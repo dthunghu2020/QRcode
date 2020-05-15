@@ -9,6 +9,7 @@ public class CodeData {
     private String save;
     private String like;
     private String note;
+    private boolean isTicked = false;
 
     public CodeData(String id, String data, String type, String createTime, String createAt, String save, String like, String note) {
         this.id = id;
@@ -83,6 +84,14 @@ public class CodeData {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public boolean isTicked() {
+        return isTicked;
+    }
+
+    public void setTicked(boolean ticked) {
+        isTicked = ticked;
     }
 }
 

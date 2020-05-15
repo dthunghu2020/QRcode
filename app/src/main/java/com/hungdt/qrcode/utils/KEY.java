@@ -11,4 +11,9 @@ public interface KEY {
 
     String SAVED = "Saved";
     String HISTORY = "History";
+    String LIKE = "Like";
+    String CODE_ID = "Code id";
+    String TYPE_RESULT ="type result" ;
+    String DELETE = "delete";
+    String UPDATE = "update";
 }

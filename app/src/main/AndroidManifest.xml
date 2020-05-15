@@ -41,6 +41,7 @@
             android:name=".view.CodeScannedActivity" />
         <activity android:name=".view.GenerateCodeActivity" />
         <activity android:name=".view.ListCodeActivity" />
+        <activity android:name=".view.DetailCodeActivity" />
     </application>
 
 </manifest>

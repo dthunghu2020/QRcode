@@ -33,6 +33,8 @@ import com.hungdt.qrcode.utils.KEY;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -42,11 +44,7 @@ public class CodeScannedActivity extends AppCompatActivity {
     private TextView txtResultCode,txtTitle,txtNotification;
     private LinearLayout llCopyText, llShare, llSearch,llNewScan;
 
-    private String codeData;
-    private String typeCode;
-    private String typeCreate;
-
-    private static final int FILE_SHARE_PERMISSION = 102;
+    private String codeText;
 
     final Calendar calendar = Calendar.getInstance();
 
@@ -59,11 +57,11 @@ public class CodeScannedActivity extends AppCompatActivity {
         initView();
 
         Intent intent = getIntent();
-        codeData = intent.getStringExtra(KEY.RESULT_TEXT);
-        typeCode = intent.getStringExtra(KEY.RESULT_TYPE_CODE);
-        typeCreate = intent.getStringExtra(KEY.TYPE_CREATE);
+        codeText = intent.getStringExtra(KEY.RESULT_TEXT);
+        String typeCode = intent.getStringExtra(KEY.RESULT_TYPE_CODE);
+        String typeCreate = intent.getStringExtra(KEY.TYPE_CREATE);
 
-        DBHelper.getInstance(this).addData(codeData, typeCode,getInstantDateTime(), typeCreate,"No","Like","");
+        DBHelper.getInstance(this).addData(codeText, typeCode,getInstantDateTime(), typeCreate,"No","Like","");
 
         /*if (intent.hasExtra(KEY.RESULT_BITMAP)) {
             bitmapResult = BitmapFactory.decodeByteArray(getIntent().getByteArrayExtra(KEY.RESULT_BITMAP),
@@ -81,11 +79,11 @@ public class CodeScannedActivity extends AppCompatActivity {
                 txtTitle.setText("Image Scan");
                 break;
         }
-        if(codeData ==null){
+        if(codeText ==null){
             txtNotification.setText("Scan Fail!");
             txtNotification.setTextColor(getResources().getColor(R.color.red));
         }else {
-            txtResultCode.setText(codeData);
+            txtResultCode.setText(codeText);
             txtNotification.setTextColor(getResources().getColor(R.color.colorAccent));
         }
 
@@ -102,17 +100,26 @@ public class CodeScannedActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 ClipboardManager clipboard = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("your_text_to_be_copied",codeData);
+                ClipData clip = ClipData.newPlainText("your_text_to_be_copied", codeText);
                 assert clipboard != null;
                 clipboard.setPrimaryClip(clip);
-                Toast.makeText(CodeScannedActivity.this, "Copied "+ codeData, Toast.LENGTH_SHORT).show();
+                Toast.makeText(CodeScannedActivity.this, "Copied "+ codeText, Toast.LENGTH_SHORT).show();
             }
         });
 
         llSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(CodeScannedActivity.this, "Search", Toast.LENGTH_SHORT).show();
+                String query = null;
+                try {
+                    query = URLEncoder.encode(codeText, "utf-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                String url = "http://www.google.com/search?q=" + query;
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(url));
+                startActivity(intent);
             }
         });
 
@@ -124,12 +131,19 @@ public class CodeScannedActivity extends AppCompatActivity {
                         sharePicturePNG(CodeScannedActivity.this,imgResultImage);
                         //saveQrCode();
                     } else {
-                        ActivityCompat.requestPermissions(CodeScannedActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, FILE_SHARE_PERMISSION);
+                        ActivityCompat.requestPermissions(CodeScannedActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, MainActivity.FILE_SHARE_PERMISSION);
                     }
                 } else {
                     sharePicturePNG(CodeScannedActivity.this,imgResultImage);
                 }
                 sharePicturePNG(CodeScannedActivity.this,imgResultImage);
+            }
+        });
+
+        llNewScan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
             }
         });
     }
@@ -185,9 +199,9 @@ public class CodeScannedActivity extends AppCompatActivity {
 
 
 
-            Log.d("xxxx", "uri: "+codeData);
+            Log.d("xxxx", "uri: "+ codeText);
             Log.d("xxxx", "uri: "+uri);
-            share.putExtra(Intent.EXTRA_TEXT,""+codeData);
+            share.putExtra(Intent.EXTRA_TEXT,""+ codeText);
             share.putExtra(Intent.EXTRA_STREAM,uri);
             share.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             //share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -203,8 +217,8 @@ public class CodeScannedActivity extends AppCompatActivity {
 
     private void initView() {
         imgBack = findViewById(R.id.imgBack);
-        imgResultImage = findViewById(R.id.imgResultImage);
-        txtResultCode = findViewById(R.id.txtResultCode);
+        imgResultImage = findViewById(R.id.imgDetailImage);
+        txtResultCode = findViewById(R.id.txtDetailCode);
         txtNotification = findViewById(R.id.txtNotification);
         txtTitle = findViewById(R.id.txtTitle);
         llNewScan = findViewById(R.id.llNewScan);

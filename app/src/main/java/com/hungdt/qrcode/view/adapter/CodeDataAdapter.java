@@ -2,6 +2,7 @@ package com.hungdt.qrcode.view.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,8 @@ import com.hungdt.qrcode.R;
 import com.hungdt.qrcode.database.DBHelper;
 import com.hungdt.qrcode.dataset.Constant;
 import com.hungdt.qrcode.model.CodeData;
+import com.hungdt.qrcode.utils.KEY;
+import com.hungdt.qrcode.view.DetailCodeActivity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,6 +34,9 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
     private List<CodeData> listData;
     private LayoutInflater layoutInflater;
     private String dateCheck = "";
+    private Boolean onCheckBox = false;
+
+    private OnDetailCodeItemClickListener onDetailCodeItemClickListener;
 
     public CodeDataAdapter(Context context, List<CodeData> listData) {
         this.listData = listData;
@@ -46,9 +52,8 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
 
     @Override
     public void onBindViewHolder(@NonNull final CodeDataHolder holder, final int position) {
-        setVisible(holder);
-        final CodeData codeData = listData.get(position);
 
+        final CodeData codeData = listData.get(position);
 
         @SuppressLint("SimpleDateFormat") final SimpleDateFormat sdfDate = new SimpleDateFormat(Constant.getDateFormat());
         @SuppressLint("SimpleDateFormat") final SimpleDateFormat sdfDateTime = new SimpleDateFormat(Constant.getDateTimeFormat());
@@ -60,7 +65,7 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
                     dateCheck = sdfDate.format(date);
                     holder.txtDay.setVisibility(View.VISIBLE);
                     holder.txtDay.setText(dateCheck);
-                }else {
+                } else {
                     holder.txtDay.setVisibility(View.GONE);
                 }
             }
@@ -73,36 +78,51 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
         holder.txtCodeType.setText(codeData.getType());
         holder.txtData.setText(codeData.getData());
 
-        if(codeData.getLike().equals("Like")){
-            setViewLike(holder);
+
+        if(!onCheckBox){
+            holder.checkbox.setVisibility(View.GONE);
         }else {
+            holder.checkbox.setVisibility(View.VISIBLE);
+        }
+
+        if (codeData.getLike().equals("Like")) {
+            setViewLike(holder);
+        } else {
             setViewLove(holder);
+        }
+
+        if(codeData.isTicked()&&onCheckBox){
+            holder.checkbox.setChecked(true);
         }
 
         holder.flLike.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(codeData.getLike().equals("Like")){
-                    setViewLove(holder);
-                    DBHelper.getInstance(layoutInflater.getContext()).setLike(codeData.getId(),"Love");
-                }else {
-                    setViewLike(holder);
-                    DBHelper.getInstance(layoutInflater.getContext()).setLike(codeData.getId(),"Like");
+                if(!onCheckBox){
+                    if (codeData.getLike().equals("Like")) {
+                        setViewLove(holder);
+                        codeData.setLike("Love");
+                        DBHelper.getInstance(layoutInflater.getContext()).setLike(codeData.getId(), "Love");
+                    } else {
+                        setViewLike(holder);
+                        codeData.setLike("Like");
+                        DBHelper.getInstance(layoutInflater.getContext()).setLike(codeData.getId(), "Like");
+                    }
                 }
-            }
-        });
-
-        holder.imgDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(layoutInflater.getContext(), "Delete", Toast.LENGTH_SHORT).show();
             }
         });
 
         holder.clItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(layoutInflater.getContext(), "Item", Toast.LENGTH_SHORT).show();
+                if(onCheckBox){
+                    if(codeData.isTicked()){
+                        holder.checkbox.setChecked(false);
+                    }else {
+                        holder.checkbox.setChecked(true);
+                    }
+                }
+                onDetailCodeItemClickListener.OnItemClicked(holder.getAdapterPosition(), onCheckBox);
             }
         });
 
@@ -112,14 +132,10 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
         holder.imgLove.setVisibility(View.INVISIBLE);
         holder.imgLike.setVisibility(View.VISIBLE);
     }
+
     private void setViewLove(CodeDataHolder holder) {
         holder.imgLove.setVisibility(View.VISIBLE);
         holder.imgLike.setVisibility(View.INVISIBLE);
-    }
-
-    private void setVisible(CodeDataHolder holder) {
-        holder.checkbox.setVisibility(View.GONE);
-        holder.imgLove.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -130,7 +146,7 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
     class CodeDataHolder extends RecyclerView.ViewHolder {
         private TextView txtDay, txtTitle, txtTime, txtCodeType, txtData;
         private CheckBox checkbox;
-        private ImageView imgTypeOfText, imgLike, imgLove, imgDelete;
+        private ImageView imgTypeOfText, imgLike, imgLove;
         private FrameLayout flLike;
         private ConstraintLayout clItem;
 
@@ -145,9 +161,24 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
             imgTypeOfText = itemView.findViewById(R.id.imgTypeOfText);
             imgLike = itemView.findViewById(R.id.imgLike);
             imgLove = itemView.findViewById(R.id.imgLove);
-            imgDelete = itemView.findViewById(R.id.imgDelete);
             flLike = itemView.findViewById(R.id.flLike);
             clItem = itemView.findViewById(R.id.clItem);
         }
+    }
+
+    public void setOnDetailCodeItemClickListener(OnDetailCodeItemClickListener onDetailCodeItemClickListener) {
+        this.onDetailCodeItemClickListener = onDetailCodeItemClickListener;
+    }
+
+    public interface OnDetailCodeItemClickListener {
+        void OnItemClicked(int position, boolean checkBox);
+    }
+
+    public void enableCheckBox() {
+        onCheckBox = true;
+    }
+
+    public void disableCheckBox() {
+        onCheckBox = false;
     }
 }

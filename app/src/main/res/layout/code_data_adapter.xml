@@ -27,38 +27,27 @@
             android:layout_height="match_parent"
             android:padding="@dimen/_2sdp">
 
-            <ImageView
-                android:id="@+id/imgDelete"
-                android:layout_width="@dimen/_25sdp"
-                android:layout_height="@dimen/_25sdp"
-                android:layout_marginEnd="@dimen/_5sdp"
-                android:padding="@dimen/_3sdp"
-                android:src="@drawable/ic_delete"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
             <FrameLayout
                 android:id="@+id/flLike"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/_2sdp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/imgDelete"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
                     android:id="@+id/imgLike"
-                    android:layout_width="@dimen/_25sdp"
-                    android:layout_height="@dimen/_25sdp"
-                    android:padding="@dimen/_3sdp"
+                    android:layout_width="@dimen/_30sdp"
+                    android:layout_height="@dimen/_30sdp"
+                    android:padding="@dimen/_5sdp"
                     android:src="@drawable/ic_like" />
 
                 <ImageView
                     android:id="@+id/imgLove"
-                    android:layout_width="@dimen/_25sdp"
-                    android:layout_height="@dimen/_25sdp"
-                    android:padding="@dimen/_3sdp"
+                    android:layout_width="@dimen/_30sdp"
+                    android:layout_height="@dimen/_30sdp"
+                    android:padding="@dimen/_5sdp"
                     android:src="@drawable/ic_love" />
 
             </FrameLayout>
@@ -118,6 +107,8 @@
                     android:id="@+id/txtData"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:maxLines="3"
+                    android:ellipsize="end"
                     android:text="Body" />
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>

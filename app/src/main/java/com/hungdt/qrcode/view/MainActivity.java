@@ -51,10 +51,12 @@ public class MainActivity extends AppCompatActivity {
 
     public static Bitmap BITMAP;
     private static final int GALLERY_REQUEST_CODE = 203;
+    public static final int FILE_SHARE_PERMISSION = 102;
+    public static final int REQUEST_CODE_DETAIL_CODE = 101;
 
     private ImageView imgMenu, imgScanImage, imgFlashOn, imgFlashOff;
     private FrameLayout flFlash;
-    private LinearLayout llGenerateCode, llSaved, llHistory;
+    private LinearLayout llGenerateCode, llSaved, llLike,llHistory;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
 
@@ -194,6 +196,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        llLike.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,ListCodeActivity.class);
+                intent.putExtra(KEY.TYPE_VIEW,KEY.LIKE);
+                startActivity(intent);
+            }
+        });
+
         llHistory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -216,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
         flFlash = findViewById(R.id.flFlash);
         llGenerateCode = findViewById(R.id.llGenerateCode);
         llSaved = findViewById(R.id.llSaved);
+        llLike = findViewById(R.id.llLike);
         llHistory = findViewById(R.id.llHistory);
     }
 

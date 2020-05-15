@@ -5,10 +5,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.TextUtils;
 
 import com.hungdt.qrcode.model.CodeData;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class DBHelper extends SQLiteOpenHelper {
@@ -98,14 +101,14 @@ public class DBHelper extends SQLiteOpenHelper {
         return codeData;
     }
 
-    public List<CodeData> getCodeLike(String like) {
+    public List<CodeData> getAllCodeLike() {
         SQLiteDatabase db = instance.getWritableDatabase();
 
         Cursor cursor = db.rawQuery(String.format("SELECT * FROM '%s';", TABLE_DATA), null);
         List<CodeData> codeData = new ArrayList<>();
         if (cursor.moveToFirst()) {
             while (!cursor.isAfterLast()) {
-                if (cursor.getString(cursor.getColumnIndex(COLUMN_CODE_LIKE)).equals(like)) {
+                if (cursor.getString(cursor.getColumnIndex(COLUMN_CODE_LIKE)).equals("Love")) {
                     codeData.add(new CodeData(cursor.getString(cursor.getColumnIndex(COLUMN_CODE_ID)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_DATA)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_TYPE)),
@@ -148,7 +151,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return codeData;
     }
 
-    public void updateLike(String id, String like) {
+    public void setLike(String id, String like) {
         SQLiteDatabase db = instance.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -180,6 +183,57 @@ public class DBHelper extends SQLiteOpenHelper {
         return data;
     }
 
+    public CodeData getOneCodeData(String id) {
+        SQLiteDatabase db = instance.getWritableDatabase();
+
+        Cursor cursor = db.rawQuery(String.format("SELECT * FROM '%s';", TABLE_DATA), null);
+        CodeData codeData = null;
+        if (cursor.moveToFirst()) {
+            while (!cursor.isAfterLast()) {
+                if (cursor.getString(cursor.getColumnIndex(COLUMN_CODE_ID)).equals(id)) {
+                    codeData = new CodeData(id,
+                            cursor.getString(cursor.getColumnIndex(COLUMN_CODE_DATA)),
+                            cursor.getString(cursor.getColumnIndex(COLUMN_CODE_TYPE)),
+                            cursor.getString(cursor.getColumnIndex(COLUMN_CODE_CREATE_TIME)),
+                            cursor.getString(cursor.getColumnIndex(COLUMN_CODE_CREATE_AT)),
+                            cursor.getString(cursor.getColumnIndex(COLUMN_CODE_SAVE)),
+                            cursor.getString(cursor.getColumnIndex(COLUMN_CODE_LIKE)),
+                            cursor.getString(cursor.getColumnIndex(COLUMN_CODE_NOTE)));
+                }
+                cursor.moveToNext();
+            }
+        }
+        cursor.close();
+        db.close();
+        return codeData;
+    }
+
+    public void deleteOneCodeData(String id) {
+        SQLiteDatabase db = instance.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_CODE_ID, id);
+        db.delete(TABLE_DATA, COLUMN_CODE_ID + "='" + id + "'", new String[]{});
+
+        db.close();
+    }
+
+
+    public void deleteCodeData(List<String> ids) {
+        SQLiteDatabase db = instance.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        /*String[] Ids = ......; //Array of Ids you wish to delete.
+        String whereClause = String.format(COLUMN_CODE_ID + " in (%s)", new Object[] { TextUtils.join(",", Collections.nCopies(listId.size(), "?")) });
+        db.delete(TABLE_DATA, whereClause, Ids);*/
+        for (int i = 0; i < ids.size(); i++) {
+            values.put(COLUMN_CODE_ID, ids.get(i));
+            db.delete(TABLE_DATA, COLUMN_CODE_ID + "='" + ids.get(i) + "'", new String[]{});
+        }
+
+        db.close();
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_TABLE_DATA);
@@ -190,12 +244,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_DATA);
     }
 
-    public void setLike(String id, String like) {
-        SQLiteDatabase db = instance.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_CODE_LIKE, like);
-        db.update(TABLE_DATA, values, COLUMN_CODE_ID + "='" + id + "'", null);
-        db.close();
-    }
+
+
 }
