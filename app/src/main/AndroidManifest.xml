@@ -2,11 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hungdt.qrcode">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-feature android:name="android.hardware.camera.flash" />
+    <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
         android:allowBackup="true"
@@ -42,6 +44,11 @@
         <activity android:name=".view.GenerateCodeActivity" />
         <activity android:name=".view.ListCodeActivity" />
         <activity android:name=".view.DetailCodeActivity" />
+        <activity android:name=".view.PolicyActivity" />
+        <activity android:name=".view.RateAppActivity" />
+        <activity android:name=".view.VipActivity" />
+        <activity android:name=".view.MoreAppActivity" />
+        <activity android:name=".view.AskPermissionActivity" />
     </application>
 
 </manifest>

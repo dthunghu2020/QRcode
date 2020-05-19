@@ -35,13 +35,13 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
-        android:gravity="center"
         android:id="@+id/txtText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_20sdp"
         android:layout_marginTop="@dimen/_10sdp"
         android:layout_marginEnd="@dimen/_20sdp"
+        android:gravity="center"
         android:text="Enter Phone number, Website, Email, ... to generate code"
         app:layout_constraintTop_toBottomOf="@+id/topBar" />
 
@@ -70,6 +70,8 @@
         android:layout_marginTop="@dimen/_10sdp"
         android:layout_marginEnd="@dimen/_10sdp"
         android:background="@drawable/shape_conner_gray"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:gravity="center_vertical"
         android:minHeight="@dimen/_50sdp"
         android:paddingStart="@dimen/_8sdp"

@@ -2,16 +2,14 @@ package com.hungdt.qrcode.view.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -21,8 +19,6 @@ import com.hungdt.qrcode.R;
 import com.hungdt.qrcode.database.DBHelper;
 import com.hungdt.qrcode.dataset.Constant;
 import com.hungdt.qrcode.model.CodeData;
-import com.hungdt.qrcode.utils.KEY;
-import com.hungdt.qrcode.view.DetailCodeActivity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,7 +29,6 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
 
     private List<CodeData> listData;
     private LayoutInflater layoutInflater;
-    private String dateCheck = "";
     private Boolean onCheckBox = false;
 
     private OnDetailCodeItemClickListener onDetailCodeItemClickListener;
@@ -61,17 +56,25 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
         try {
             date = sdfDateTime.parse(codeData.getCreateTime());
             if (date != null) {
-                if (!dateCheck.equals(sdfDate.format(date))) {
-                    dateCheck = sdfDate.format(date);
-                    holder.txtDay.setVisibility(View.VISIBLE);
-                    holder.txtDay.setText(dateCheck);
+                if (position == 0) {
+                    holder.txtHistoryDay.setVisibility(View.VISIBLE);
+                    holder.txtHistoryDay.setText(sdfDate.format(date));
                 } else {
-                    holder.txtDay.setVisibility(View.GONE);
+                    String dayCheck = sdfDate.format(date);
+                    date = sdfDateTime.parse(listData.get(position - 1).getCreateTime());
+                    assert date != null;
+                    if (!dayCheck.equals(sdfDate.format(date))) {
+                        holder.txtHistoryDay.setVisibility(View.VISIBLE);
+                        holder.txtHistoryDay.setText(dayCheck);
+                    } else {
+                        holder.txtHistoryDay.setVisibility(View.GONE);
+                    }
                 }
             }
         } catch (ParseException e) {
             e.printStackTrace();
         }
+
 
         holder.txtTitle.setText(codeData.getCreateAt());
         holder.txtTime.setText(codeData.getCreateTime());
@@ -79,9 +82,9 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
         holder.txtData.setText(codeData.getData());
 
 
-        if(!onCheckBox){
+        if (!onCheckBox) {
             holder.checkbox.setVisibility(View.GONE);
-        }else {
+        } else {
             holder.checkbox.setVisibility(View.VISIBLE);
         }
 
@@ -91,14 +94,16 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
             setViewLove(holder);
         }
 
-        if(codeData.isTicked()&&onCheckBox){
+        if (codeData.isTicked()) {
             holder.checkbox.setChecked(true);
+        } else {
+            holder.checkbox.setChecked(false);
         }
 
         holder.flLike.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!onCheckBox){
+                if (!onCheckBox) {
                     if (codeData.getLike().equals("Like")) {
                         setViewLove(holder);
                         codeData.setLike("Love");
@@ -108,6 +113,8 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
                         codeData.setLike("Like");
                         DBHelper.getInstance(layoutInflater.getContext()).setLike(codeData.getId(), "Like");
                     }
+                } else {
+                    setClickITem(codeData, holder);
                 }
             }
         });
@@ -115,17 +122,30 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
         holder.clItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(onCheckBox){
-                    if(codeData.isTicked()){
-                        holder.checkbox.setChecked(false);
-                    }else {
-                        holder.checkbox.setChecked(true);
-                    }
+                if (onCheckBox) {
+                    setClickITem(codeData, holder);
                 }
                 onDetailCodeItemClickListener.OnItemClicked(holder.getAdapterPosition(), onCheckBox);
             }
         });
+        holder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    listData.get(position).setTicked(true);
+                }else {
+                    listData.get(position).setTicked(false);
+                }
+            }
+        });
+    }
 
+    private void setClickITem(CodeData codeData, CodeDataHolder holder) {
+        if (codeData.isTicked()) {
+            holder.checkbox.setChecked(false);
+        } else {
+            holder.checkbox.setChecked(true);
+        }
     }
 
     private void setViewLike(CodeDataHolder holder) {
@@ -143,16 +163,16 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
         return listData.size();
     }
 
-    class CodeDataHolder extends RecyclerView.ViewHolder {
-        private TextView txtDay, txtTitle, txtTime, txtCodeType, txtData;
+    static class CodeDataHolder extends RecyclerView.ViewHolder {
+        private TextView txtHistoryDay, txtTitle, txtTime, txtCodeType, txtData;
         private CheckBox checkbox;
         private ImageView imgTypeOfText, imgLike, imgLove;
         private FrameLayout flLike;
         private ConstraintLayout clItem;
 
-        public CodeDataHolder(@NonNull View itemView) {
+        CodeDataHolder(@NonNull View itemView) {
             super(itemView);
-            txtDay = itemView.findViewById(R.id.txtDay);
+            txtHistoryDay = itemView.findViewById(R.id.txtHistoryDay);
             txtTitle = itemView.findViewById(R.id.txtTitle);
             txtTime = itemView.findViewById(R.id.txtTime);
             txtCodeType = itemView.findViewById(R.id.txtCodeType);

@@ -2,22 +2,30 @@ package com.hungdt.qrcode.view;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -26,6 +34,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -42,6 +51,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Objects;
 
 public class GenerateCodeActivity extends AppCompatActivity {
 
@@ -53,10 +63,9 @@ public class GenerateCodeActivity extends AppCompatActivity {
     private MultiFormatWriter multiFormatWriter;
     private BarcodeFormat barcodeFormat;
 
-    private static final int FILE_SHARE_PERMISSION = 102;
-
     private String dataSave;
     private String typeCodeSave;
+    private boolean codeGenerated = false;
 
     final Calendar calendar = Calendar.getInstance();
 
@@ -88,7 +97,7 @@ public class GenerateCodeActivity extends AppCompatActivity {
         names.add("MAXICODE");
         names.add("RSS_EXPANDED");
 
-        ArrayAdapter arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, names);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, names);
         spinnerCodeType.setAdapter(arrayAdapter);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCodeType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -232,11 +241,11 @@ public class GenerateCodeActivity extends AppCompatActivity {
         llSaveCodeGenerate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(edtTextGenerateCode.getText().toString().equals(dataSave)){
+                if (edtTextGenerateCode.getText().toString().equals(dataSave)) {
                     Toast.makeText(GenerateCodeActivity.this, "Save Success!", Toast.LENGTH_SHORT).show();
-                    DBHelper.getInstance(GenerateCodeActivity.this).addData(dataSave, typeCodeSave,getInstantDateTime(), KEY.TYPE_GENERATE,"Yes","Like","");
+                    DBHelper.getInstance(GenerateCodeActivity.this).addData(dataSave, typeCodeSave, getInstantDateTime(), KEY.TYPE_GENERATE, "Yes", "Like", "");
                     onBackPressed();
-                }else {
+                } else {
                     Toast.makeText(GenerateCodeActivity.this, "You have change code. Please regenerate and try again!", Toast.LENGTH_SHORT).show();
                 }
 
@@ -248,17 +257,43 @@ public class GenerateCodeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (Build.VERSION.SDK_INT >= 23) {
                     if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) && checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                        sharePicturePNG(GenerateCodeActivity.this,imgCodeGenerate);
-                        //saveQrCode();
+                        shareDialog();
                     } else {
-                        ActivityCompat.requestPermissions(GenerateCodeActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, FILE_SHARE_PERMISSION);
+                        ActivityCompat.requestPermissions(GenerateCodeActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, MainActivity.FILE_SHARE_PERMISSION);
                     }
                 } else {
-                    sharePicturePNG(GenerateCodeActivity.this,imgCodeGenerate);
+                    shareDialog();
                 }
-
             }
         });
+    }
+
+    private void shareDialog() {
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        bottomSheetDialog.setContentView(R.layout.choose_type_share_bottom_dialog);
+
+        LinearLayout llShareText = bottomSheetDialog.findViewById(R.id.llShareText);
+        LinearLayout llShareImage = bottomSheetDialog.findViewById(R.id.llShareImage);
+
+        assert llShareText != null;
+        llShareText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shareText(dataSave);
+                bottomSheetDialog.dismiss();
+            }
+        });
+
+        assert llShareImage != null;
+        llShareImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sharePicturePNG(GenerateCodeActivity.this, imgCodeGenerate);
+                bottomSheetDialog.dismiss();
+            }
+        });
+        //Objects.requireNonNull(bottomSheetDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        bottomSheetDialog.show();
     }
 
     private boolean checkPermission(String permission) {
@@ -268,6 +303,21 @@ public class GenerateCodeActivity extends AppCompatActivity {
         } else {
             return false;
         }
+    }
+
+    private void shareText(String dataSave) {
+
+        /*Create an ACTION_SEND Intent*/
+        Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+        /*This will be the actual content you wish you share.*/
+        String shareBody = "Here is the share content body";
+        /*The type of the content is text, obviously.*/
+        intent.setType("text/plain");
+        /*Applying information Subject and Body.*/
+        intent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Share code");
+        intent.putExtra(android.content.Intent.EXTRA_TEXT, dataSave);
+        /*Fire!*/
+        startActivity(Intent.createChooser(intent, "Share Code"));
     }
 
     public void sharePicturePNG(Context context, ImageView content) {
@@ -295,30 +345,22 @@ public class GenerateCodeActivity extends AppCompatActivity {
             }
 
             //Action share
-
             Intent share = new Intent(Intent.ACTION_SEND);
-            share.setType("*/*");
+            share.setType("images/*");
 
             Uri uri;
             if (Build.VERSION.SDK_INT >= 24) {
-                uri= FileProvider.getUriForFile(
+                uri = FileProvider.getUriForFile(
                         context,
                         getString(R.string.author),
                         new File(cachePath.getPath())
                 );
             } else {
-                uri= Uri.fromFile(new File(cachePath.getPath()));
+                uri = Uri.fromFile(new File(cachePath.getPath()));
+
             }
-            Log.d("xxxx", "uri: "+uri);
-
-
-
-            Log.d("xxxx", "uri: "+edtTextGenerateCode.getText());
-            Log.d("xxxx", "uri: "+uri);
-            share.putExtra(Intent.EXTRA_TEXT,""+edtTextGenerateCode.getText());
-            share.putExtra(Intent.EXTRA_STREAM,uri);
+            share.putExtra(Intent.EXTRA_STREAM, uri);
             share.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            //share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(Intent.createChooser(share, "Share Code"));
         } catch (Exception e) {
             e.printStackTrace();
@@ -357,9 +399,10 @@ public class GenerateCodeActivity extends AppCompatActivity {
         BitMatrix bitMatrix = multiFormatWriter.encode(dataSave, type, 400, 400);
         BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
         Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
-        Log.e("123123", "generateCode: "+bitmap );
+        Log.e("123123", "generateCode: " + bitmap);
         if (bitmap != null) {
             visibleView();
+            codeGenerated = true;
             imgCodeGenerate.setImageBitmap(bitmap);
         }
     }
@@ -369,4 +412,53 @@ public class GenerateCodeActivity extends AppCompatActivity {
         return sdf.format(calendar.getTime());
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (getCurrentFocus() != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    private void openExitGenerateDialog() {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_qs_yes_no);
+
+        TextView txtTitle =dialog.findViewById(R.id.txtTitle);
+        TextView txtBody =dialog.findViewById(R.id.txtBody);
+        Button btnYes = dialog.findViewById(R.id.btnYes);
+        Button btnNo = dialog.findViewById(R.id.btnNo);
+
+        btnNo.setText("Back");
+        txtTitle.setText("Exit");
+        txtBody.setText("Exit without save code generated?");
+
+        btnYes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                finish();
+            }
+        });
+
+        btnNo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(codeGenerated){
+            openExitGenerateDialog();
+        }else {
+            super.onBackPressed();
+        }
+    }
 }

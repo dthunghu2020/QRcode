@@ -20,13 +20,17 @@
 
         <com.journeyapps.barcodescanner.DecoratedBarcodeView
             android:id="@+id/scanner_view"
-            android:layout_width="@dimen/_250sdp"
-            android:layout_height="@dimen/_250sdp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:zxing_framing_rect_width="@dimen/_240sdp"
+            app:zxing_framing_rect_height="@dimen/_240sdp"
             app:maskColor="#77000000" />
+
+<!--         app:zxing_use_texture_view="false"-->
 
         <ImageView
             android:id="@+id/imgMenu"
@@ -43,7 +47,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:padding="@dimen/_6sdp"
-            app:layout_constraintTop_toBottomOf="@id/scanner_view"
+            android:layout_marginBottom="?attr/actionBarSize"
             app:layout_constraintBottom_toBottomOf="parent">
 
             <LinearLayout
@@ -60,10 +64,11 @@
                     android:src="@drawable/ic_generate" />
 
                 <TextView
+                    android:gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_5sdp"
-                    android:text="Generate Code"
+                    android:text="Generate"
                     android:textColor="#000000" />
             </LinearLayout>
 

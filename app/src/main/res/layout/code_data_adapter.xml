@@ -6,7 +6,7 @@
     android:padding="@dimen/_2sdp">
 
     <TextView
-        android:id="@+id/txtDay"
+        android:id="@+id/txtHistoryDay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/_10sdp"
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardCornerRadius="@dimen/_6sdp"
-        app:layout_constraintTop_toBottomOf="@+id/txtDay">
+        app:layout_constraintTop_toBottomOf="@+id/txtHistoryDay">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clItem"

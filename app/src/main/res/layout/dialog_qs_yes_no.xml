@@ -9,6 +9,7 @@
     android:padding="@dimen/_16sdp">
 
     <TextView
+        android:id="@+id/txtTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Delete"
@@ -17,6 +18,7 @@
         android:textStyle="bold" />
 
     <TextView
+        android:id="@+id/txtBody"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_5sdp"

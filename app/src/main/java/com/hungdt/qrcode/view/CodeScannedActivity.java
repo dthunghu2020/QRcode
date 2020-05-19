@@ -2,47 +2,49 @@ package com.hungdt.qrcode.view;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
+import android.provider.Settings;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
 
 import com.hungdt.qrcode.R;
 import com.hungdt.qrcode.database.DBHelper;
 import com.hungdt.qrcode.dataset.Constant;
 import com.hungdt.qrcode.utils.KEY;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Objects;
 
 public class CodeScannedActivity extends AppCompatActivity {
 
     private ImageView imgBack, imgResultImage;
-    private TextView txtResultCode,txtTitle,txtNotification;
-    private LinearLayout llCopyText, llShare, llSearch,llNewScan;
+    private TextView txtResultCode, txtTitle, txtNotification;
+    private LinearLayout llCopyText, llShare, llSearch, llNewScan;
 
     private String codeText;
 
@@ -61,7 +63,7 @@ public class CodeScannedActivity extends AppCompatActivity {
         String typeCode = intent.getStringExtra(KEY.RESULT_TYPE_CODE);
         String typeCreate = intent.getStringExtra(KEY.TYPE_CREATE);
 
-        DBHelper.getInstance(this).addData(codeText, typeCode,getInstantDateTime(), typeCreate,"No","Like","");
+        DBHelper.getInstance(this).addData(codeText, typeCode, getInstantDateTime(), typeCreate, "No", "Like", "");
 
         /*if (intent.hasExtra(KEY.RESULT_BITMAP)) {
             bitmapResult = BitmapFactory.decodeByteArray(getIntent().getByteArrayExtra(KEY.RESULT_BITMAP),
@@ -79,10 +81,10 @@ public class CodeScannedActivity extends AppCompatActivity {
                 txtTitle.setText("Image Scan");
                 break;
         }
-        if(codeText ==null){
+        if (codeText == null) {
             txtNotification.setText("Scan Fail!");
             txtNotification.setTextColor(getResources().getColor(R.color.red));
-        }else {
+        } else {
             txtResultCode.setText(codeText);
             txtNotification.setTextColor(getResources().getColor(R.color.colorAccent));
         }
@@ -99,11 +101,11 @@ public class CodeScannedActivity extends AppCompatActivity {
         llCopyText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ClipboardManager clipboard = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("your_text_to_be_copied", codeText);
                 assert clipboard != null;
                 clipboard.setPrimaryClip(clip);
-                Toast.makeText(CodeScannedActivity.this, "Copied "+ codeText, Toast.LENGTH_SHORT).show();
+                Toast.makeText(CodeScannedActivity.this, "Copied " + codeText, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -126,17 +128,7 @@ public class CodeScannedActivity extends AppCompatActivity {
         llShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Build.VERSION.SDK_INT >= 23) {
-                    if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) && checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                        sharePicturePNG(CodeScannedActivity.this,imgResultImage);
-                        //saveQrCode();
-                    } else {
-                        ActivityCompat.requestPermissions(CodeScannedActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, MainActivity.FILE_SHARE_PERMISSION);
-                    }
-                } else {
-                    sharePicturePNG(CodeScannedActivity.this,imgResultImage);
-                }
-                sharePicturePNG(CodeScannedActivity.this,imgResultImage);
+                shareCode(txtResultCode.getText().toString());
             }
         });
 
@@ -147,72 +139,19 @@ public class CodeScannedActivity extends AppCompatActivity {
             }
         });
     }
-    private boolean checkPermission(String permission) {
-        int result = ContextCompat.checkSelfPermission(CodeScannedActivity.this, permission);
-        if (result == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
-    public void sharePicturePNG(Context context, ImageView content) {
-        try {
-            //lưu vào cache
-            content.setDrawingCacheEnabled(true);
-            //get bitmap từ cache
-            Bitmap bitmap = content.getDrawingCache();
-            //tạo file
-            File directory = new File(getDirPathDownloaded());
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
-            File cachePath = new File(directory + "/" + System.currentTimeMillis() + ".png");
-
-            try {
-                cachePath.createNewFile();
-                FileOutputStream optream = new FileOutputStream(cachePath);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, optream);
-                optream.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.d("xxxx", e.getMessage());
-            }
-
-            //Action share
-
-            Intent share = new Intent(Intent.ACTION_SEND);
-            share.setType("*/*");
-
-            Uri uri;
-            if (Build.VERSION.SDK_INT >= 24) {
-                uri= FileProvider.getUriForFile(
-                        context,
-                        getString(R.string.author),
-                        new File(cachePath.getPath())
-                );
-            } else {
-                uri= Uri.fromFile(new File(cachePath.getPath()));
-            }
-            Log.d("xxxx", "uri: "+uri);
-
-
-
-            Log.d("xxxx", "uri: "+ codeText);
-            Log.d("xxxx", "uri: "+uri);
-            share.putExtra(Intent.EXTRA_TEXT,""+ codeText);
-            share.putExtra(Intent.EXTRA_STREAM,uri);
-            share.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            //share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(Intent.createChooser(share, "Share Code"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static String getDirPathDownloaded() {
-        return Environment.getExternalStorageDirectory().getAbsolutePath() + "/qrcode";
+    public void shareCode(String codeData) {
+        /*Create an ACTION_SEND Intent*/
+        Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+        /*This will be the actual content you wish you share.*/
+        String shareBody = "Here is the share content body";
+        /*The type of the content is text, obviously.*/
+        intent.setType("text/plain");
+        /*Applying information Subject and Body.*/
+        intent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Share code");
+        intent.putExtra(android.content.Intent.EXTRA_TEXT, codeData);
+        /*Fire!*/
+        startActivity(Intent.createChooser(intent, "Share Code"));
     }
 
     private void initView() {

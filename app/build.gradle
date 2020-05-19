@@ -43,4 +43,6 @@ dependencies {
     implementation 'com.karumi:dexter:6.0.0'
 
     implementation 'me.dm7.barcodescanner:zxing:1.9.13'
+
+    implementation 'com.anjlab.android.iab.v3:library:1.1.0'
 }

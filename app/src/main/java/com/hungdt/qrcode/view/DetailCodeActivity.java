@@ -1,6 +1,7 @@
 package com.hungdt.qrcode.view;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ClipData;
@@ -9,10 +10,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -22,12 +26,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -43,6 +49,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Objects;
 
 public class DetailCodeActivity extends AppCompatActivity {
 
@@ -191,17 +198,7 @@ public class DetailCodeActivity extends AppCompatActivity {
         llShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Build.VERSION.SDK_INT >= 23) {
-                    if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) && checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                        sharePicturePNG(DetailCodeActivity.this,imgDetailImage);
-                        //saveQrCode();
-                    } else {
-                        ActivityCompat.requestPermissions(DetailCodeActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, MainActivity.FILE_SHARE_PERMISSION);
-                    }
-                } else {
-                    sharePicturePNG(DetailCodeActivity.this,imgDetailImage);
-                }
-                sharePicturePNG(DetailCodeActivity.this,imgDetailImage);
+                shareDialog();
             }
         });
 
@@ -209,7 +206,7 @@ public class DetailCodeActivity extends AppCompatActivity {
 
     private void openDeleteDialog() {
         final Dialog dialog = new Dialog(this);
-        dialog .setContentView(R.layout.delete_code_dialog);
+        dialog.setContentView(R.layout.dialog_qs_yes_no);
 
         Button btnYes = dialog.findViewById(R.id.btnYes);
         Button btnNo = dialog.findViewById(R.id.btnNo);
@@ -233,6 +230,7 @@ public class DetailCodeActivity extends AppCompatActivity {
             }
         });
 
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.show();
     }
 
@@ -254,6 +252,21 @@ public class DetailCodeActivity extends AppCompatActivity {
         if (bitmap != null) {
             imgDetailImage.setImageBitmap(bitmap);
         }
+    }
+
+    private void shareText(String dataSave) {
+
+        /*Create an ACTION_SEND Intent*/
+        Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+        /*This will be the actual content you wish you share.*/
+        String shareBody = "Here is the share content body";
+        /*The type of the content is text, obviously.*/
+        intent.setType("text/plain");
+        /*Applying information Subject and Body.*/
+        intent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Share code");
+        intent.putExtra(android.content.Intent.EXTRA_TEXT, dataSave);
+        /*Fire!*/
+        startActivity(Intent.createChooser(intent, "Share Code"));
     }
 
     public void sharePicturePNG(Context context, ImageView content) {
@@ -281,34 +294,54 @@ public class DetailCodeActivity extends AppCompatActivity {
             }
 
             //Action share
-
             Intent share = new Intent(Intent.ACTION_SEND);
-            share.setType("*/*");
+            share.setType("images/*");
 
             Uri uri;
             if (Build.VERSION.SDK_INT >= 24) {
-                uri= FileProvider.getUriForFile(
+                uri = FileProvider.getUriForFile(
                         context,
                         getString(R.string.author),
                         new File(cachePath.getPath())
                 );
             } else {
-                uri= Uri.fromFile(new File(cachePath.getPath()));
+                uri = Uri.fromFile(new File(cachePath.getPath()));
+
             }
-            Log.d("xxxx", "uri: "+uri);
-
-
-
-            Log.d("xxxx", "uri: "+codeData);
-            Log.d("xxxx", "uri: "+uri);
-            share.putExtra(Intent.EXTRA_TEXT,""+codeData);
-            share.putExtra(Intent.EXTRA_STREAM,uri);
+            share.putExtra(Intent.EXTRA_STREAM, uri);
             share.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            //share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(Intent.createChooser(share, "Share Code"));
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void shareDialog() {
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        bottomSheetDialog.setContentView(R.layout.choose_type_share_bottom_dialog);
+
+        LinearLayout llShareText = bottomSheetDialog.findViewById(R.id.llShareText);
+        LinearLayout llShareImage = bottomSheetDialog.findViewById(R.id.llShareImage);
+
+        assert llShareText != null;
+        llShareText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shareText(codeData.getData());
+                bottomSheetDialog.dismiss();
+            }
+        });
+
+        assert llShareImage != null;
+        llShareImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sharePicturePNG(DetailCodeActivity.this,imgDetailImage);
+                bottomSheetDialog.dismiss();
+            }
+        });
+        //Objects.requireNonNull(bottomSheetDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        bottomSheetDialog.show();
     }
 
     public static String getDirPathDownloaded() {

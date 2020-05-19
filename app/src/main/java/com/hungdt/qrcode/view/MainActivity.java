@@ -3,25 +3,39 @@ package com.hungdt.qrcode.view;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.anjlab.android.iab.v3.BillingProcessor;
+import com.anjlab.android.iab.v3.TransactionDetails;
 import com.google.android.material.navigation.NavigationView;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.LuminanceSource;
@@ -32,49 +46,54 @@ import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.common.HybridBinarizer;
 import com.hungdt.qrcode.R;
+import com.hungdt.qrcode.utils.Helper;
 import com.hungdt.qrcode.utils.KEY;
+import com.hungdt.qrcode.utils.MySetting;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import com.journeyapps.barcodescanner.camera.CameraSettings;
-import com.karumi.dexter.Dexter;
-import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionDeniedResponse;
-import com.karumi.dexter.listener.PermissionGrantedResponse;
-import com.karumi.dexter.listener.PermissionRequest;
-import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.io.IOException;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BillingProcessor.IBillingHandler {
 
     public static Bitmap BITMAP;
     private static final int GALLERY_REQUEST_CODE = 203;
     public static final int FILE_SHARE_PERMISSION = 102;
-    public static final int REQUEST_CODE_DETAIL_CODE = 101;
+    public static final int REQUEST_CODE_DETAIL_CODE = 200;
+
+    private boolean flashlight = false;
+    private boolean readyToPurchase = false;
 
     private ImageView imgMenu, imgScanImage, imgFlashOn, imgFlashOff;
     private FrameLayout flFlash;
-    private LinearLayout llGenerateCode, llSaved, llLike,llHistory;
+    private LinearLayout llGenerateCode, llSaved, llLike, llHistory;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
 
     private DecoratedBarcodeView scanner_view;
 
-    private CameraSettings cameraSettings = new CameraSettings();
 
-    private boolean flashlight = false;
+    private BillingProcessor bp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        try {
+            bp = BillingProcessor.newBillingProcessor(this, getString(R.string.BASE64), this); // doesn't bind
+            bp.initialize(); // binds
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         initView();
         imgFlashOn.setVisibility(View.INVISIBLE);
 
-        cameraSettings = new CameraSettings();
+        CameraSettings cameraSettings = new CameraSettings();
         cameraSettings.setAutoFocusEnabled(false);
         cameraSettings.setFocusMode(CameraSettings.FocusMode.CONTINUOUS);
         cameraSettings.setRequestedCameraId(0);
@@ -95,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         imgMenu.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("RtlHardcoded")
             @Override
             public void onClick(View v) {
                 if (!drawerLayout.isDrawerOpen(Gravity.LEFT)) drawerLayout.openDrawer(Gravity.LEFT);
@@ -106,45 +126,47 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.nav_setting:
-                        /*Intent intent = new Intent(MainActivity.this, SettingActivity.class);
+                    /*case R.id.nav_setting:
+                     *//*Intent intent = new Intent(MainActivity.this, SettingActivity.class);
                         startActivityForResult(intent, REQUEST_CODE_SETTING);
                         if (!showInterstitial()) {
                             if (UnityAds.isInitialized() && UnityAds.isReady(getString(R.string.INTER_UNI)))
 
                                 UnityAds.show(MainActivity.this, getString(R.string.INTER_UNI));
-                        }*/
-                        break;
+                        }*//*
+                        break;*/
                     case R.id.nav_upgradeToVIP:
                         try {
-                            //Intent intentVip = new Intent(MainActivity.this, VipActivity.class);
-                            //startActivity(intentVip);
+                            startActivity(new Intent(MainActivity.this, VipActivity.class));
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                         break;
                     case R.id.nav_remove_add:
-                        /*try {
-                            //removeAds();
+                        try {
+                            removeAds();
                         } catch (Exception e) {
                             e.printStackTrace();
-                        }*/
+                        }
                         break;
                     case R.id.nav_rate_us:
-                        //startActivity(new Intent(MainActivity.this, RateAppActivity.class));
+                        startActivity(new Intent(MainActivity.this, RateAppActivity.class));
                         break;
                     case R.id.nav_feedback_dev:
-                        //Helper.feedback(this);
+                        Helper.feedback(MainActivity.this);
                         break;
                     case R.id.nav_share:
-                        //Helper.shareApp(this);
+                        Helper.shareApp(MainActivity.this);
                         break;
                     case R.id.nav_policy:
-                        //startActivity(new Intent(MainActivity.this, PolicyActivity.class));
+                        startActivity(new Intent(MainActivity.this, PolicyActivity.class));
                         /*if (!showInterstitial()) {
                             if (UnityAds.isInitialized() && UnityAds.isReady(getString(R.string.INTER_UNI)))
                                 UnityAds.show(MainActivity.this, getString(R.string.INTER_UNI));
                         }*/
+                        break;
+                    case R.id.nav_more_app:
+                        startActivity(new Intent(MainActivity.this, MoreAppActivity.class));
                         break;
                 }
 
@@ -156,8 +178,7 @@ public class MainActivity extends AppCompatActivity {
         imgScanImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(galleryIntent, GALLERY_REQUEST_CODE);
+                chooseImageScan();
             }
         });
 
@@ -190,8 +211,8 @@ public class MainActivity extends AppCompatActivity {
         llSaved.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this,ListCodeActivity.class);
-                intent.putExtra(KEY.TYPE_VIEW,KEY.SAVED);
+                Intent intent = new Intent(MainActivity.this, ListCodeActivity.class);
+                intent.putExtra(KEY.TYPE_VIEW, KEY.SAVED);
                 startActivity(intent);
             }
         });
@@ -199,8 +220,8 @@ public class MainActivity extends AppCompatActivity {
         llLike.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this,ListCodeActivity.class);
-                intent.putExtra(KEY.TYPE_VIEW,KEY.LIKE);
+                Intent intent = new Intent(MainActivity.this, ListCodeActivity.class);
+                intent.putExtra(KEY.TYPE_VIEW, KEY.LIKE);
                 startActivity(intent);
             }
         });
@@ -208,11 +229,44 @@ public class MainActivity extends AppCompatActivity {
         llHistory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this,ListCodeActivity.class);
-                intent.putExtra(KEY.TYPE_VIEW,KEY.HISTORY);
+                Intent intent = new Intent(MainActivity.this, ListCodeActivity.class);
+                intent.putExtra(KEY.TYPE_VIEW, KEY.HISTORY);
                 startActivity(intent);
             }
         });
+
+        checkPermission();
+    }
+
+    private void checkPermission() {
+        if ((ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)||(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) ||
+                (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
+            startActivity(new Intent(this,AskPermissionActivity.class));
+        }
+    }
+
+    private void removeAds() {
+        try {
+            if (readyToPurchase) {
+                bp.subscribe(this, getString(R.string.ID_REMOVE_ADS));
+            } else {
+                Toast.makeText(this, "Billing not initialized", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void checkRemoveAds() {
+        try {
+            if (bp.isSubscribed(getString(R.string.ID_REMOVE_ADS))) {
+                MySetting.putRemoveAds(this, true);
+            } else {
+                MySetting.putRemoveAds(this, false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -237,9 +291,6 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(KEY.RESULT_TYPE_CODE, result.getBarcodeFormat().toString());
         intent.putExtra(KEY.TYPE_CREATE, KEY.TYPE_SCAN_CAMERA);
         BITMAP = result.getBitmap();
-        /*ByteArrayOutputStream bs = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 50, bs);
-        intent.putExtra(KEY.RESULT_BITMAP, bs.toByteArray());*/
         startActivity(intent);
     }
 
@@ -247,9 +298,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        try {
+            if (!bp.handleActivityResult(requestCode, resultCode, data)) {
+                super.onActivityResult(requestCode, resultCode, data);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if (requestCode == GALLERY_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                if (data!= null) {
+                if (data != null) {
                     // Get the URI of the selected file
                     final Uri uri = data.getData();
                     try {
@@ -264,11 +322,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     private void scanQRImage(Bitmap bMap) {
         String data = null;
         String type = null;
-        int[] intArray = new int[bMap.getWidth()*bMap.getHeight()];
+        int[] intArray = new int[bMap.getWidth() * bMap.getHeight()];
         //copy pixel data from the Bitmap into the 'intArray' array
         bMap.getPixels(intArray, 0, bMap.getWidth(), 0, 0, bMap.getWidth(), bMap.getHeight());
 
@@ -280,15 +337,14 @@ public class MainActivity extends AppCompatActivity {
             Result result = reader.decode(bitmap);
             data = result.getText();
             type = result.getBarcodeFormat().toString();
-            Log.e("123123", "scanQRImage: "+data);
-        }
-        catch (Exception e) {
+            Log.e("123123", "scanQRImage: " + data);
+        } catch (Exception e) {
             Log.e("QrTest", "Error decoding barcode", e);
         }
 
         Intent intent = new Intent(MainActivity.this, CodeScannedActivity.class);
-        intent.putExtra(KEY.RESULT_TEXT,data);
-        intent.putExtra(KEY.RESULT_TYPE_CODE,type);
+        intent.putExtra(KEY.RESULT_TEXT, data);
+        intent.putExtra(KEY.RESULT_TYPE_CODE, type);
         intent.putExtra(KEY.TYPE_CREATE, KEY.TYPE_SCAN_GALLERY);
         startActivity(intent);
     }
@@ -296,27 +352,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        requestForCamera();
+        scanner_view.resume();
         super.onResume();
     }
 
-    private void requestForCamera() {
-        Dexter.withActivity(this).withPermission(Manifest.permission.CAMERA).withListener(new PermissionListener() {
-            @Override
-            public void onPermissionGranted(PermissionGrantedResponse response) {
-                scanner_view.resume();
-            }
-
-            @Override
-            public void onPermissionDenied(PermissionDeniedResponse response) {
-                Toast.makeText(MainActivity.this, "camera deny", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
-                token.continuePermissionRequest();
-            }
-        }).check();
+    private void chooseImageScan() {
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galleryIntent, GALLERY_REQUEST_CODE);
     }
 
     @Override
@@ -324,4 +366,35 @@ public class MainActivity extends AppCompatActivity {
         scanner_view.pause();
         super.onPause();
     }
+
+    @Override
+    public void onProductPurchased(String productId, TransactionDetails details) {
+        Toast.makeText(this, "Thank you for your purchased!", Toast.LENGTH_SHORT).show();
+        checkRemoveAds();
+    }
+
+    @Override
+    public void onPurchaseHistoryRestored() {
+
+    }
+
+    @Override
+    public void onBillingError(int errorCode, Throwable error) {
+        Toast.makeText(this, "You have declined payment", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onBillingInitialized() {
+        readyToPurchase = true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (bp != null) {
+            bp.release();
+        }
+    }
+
+
 }

@@ -46,7 +46,7 @@ public class ListCodeActivity extends AppCompatActivity {
 
         dataList.clear();
         Intent intent = getIntent();
-        String title = intent.getStringExtra(KEY.TYPE_VIEW);
+        final String title = intent.getStringExtra(KEY.TYPE_VIEW);
         txtTitle.setText(title);
         assert title != null;
         switch (title) {
@@ -74,6 +74,7 @@ public class ListCodeActivity extends AppCompatActivity {
             }
         });
 
+        //ok
         imgDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -90,14 +91,24 @@ public class ListCodeActivity extends AppCompatActivity {
                         }
                     }
                     dataList.clear();
-                    dataList.addAll(DBHelper.getInstance(ListCodeActivity.this).getAllData());
+                    switch (title) {
+                        case KEY.HISTORY:
+                            dataList.addAll(DBHelper.getInstance(ListCodeActivity.this).getAllData());
+                            break;
+                        case KEY.SAVED:
+                            dataList.addAll(DBHelper.getInstance(ListCodeActivity.this).getCodeSaved());
+                            break;
+                        case KEY.LIKE:
+                            dataList.addAll(DBHelper.getInstance(ListCodeActivity.this).getAllCodeLike());
+                            break;
+                    }
+                    Collections.reverse(dataList);
                     disableViewCheckBox();
                     onDelete=false;
                 }
-
             }
         });
-
+        //OK
         imgCheckAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

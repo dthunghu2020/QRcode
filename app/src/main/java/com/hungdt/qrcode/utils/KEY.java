@@ -8,7 +8,6 @@ public interface KEY {
     String RESULT_TYPE_CODE = "result type";
     String TYPE_CREATE = "type";
     String TYPE_VIEW = "type view";
-
     String SAVED = "Saved";
     String HISTORY = "History";
     String LIKE = "Like";
@@ -16,4 +15,6 @@ public interface KEY {
     String TYPE_RESULT ="type result" ;
     String DELETE = "delete";
     String UPDATE = "update";
+    String CAMERA = "camera";
+    String STORAGE = "storage";
 }
