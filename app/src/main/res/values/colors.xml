@@ -5,8 +5,16 @@
     <color name="colorAccent">#03DAC5</color>
 
     <color name="gray">#CCD1D6D5</color>
+    <color name="light_gray">#F0F0F2</color>
     <color name="red">#CCFF0000</color>
     <color name="black">#111111</color>
     <color name="white">#FFFFFF</color>
     <color name="status_bar">#B31E1E1E</color>
+
+    <color name="viewfinder_mask">#3F51B5</color>
+    <color name="viewfinder_laser">#00FFFFFF</color>
+    <color name="viewfinder_border">#ffFF4081</color>
+
+    <color name="back_ground_button_main">#1A1A1A</color>
+    <color name="text_title_color">#5188F1</color>
 </resources>

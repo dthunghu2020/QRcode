@@ -16,13 +16,13 @@
             android:layout_height="@dimen/_25sdp"
             android:layout_marginStart="@dimen/_10sdp"
             android:padding="@dimen/_5sdp"
-            android:src="@drawable/ic_x"
+            android:src="@drawable/ic_back"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/txtTitle"
+            android:id="@+id/txtTitleToolBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Result"
@@ -67,7 +67,6 @@
         app:layout_constraintTop_toBottomOf="@+id/txtNotification" />
 
     <ImageView
-        android:background="@color/colorAccent"
         android:layout_marginTop="@dimen/_10sdp"
         android:id="@+id/imgDetailImage"
         android:layout_width="@dimen/_150sdp"
@@ -101,7 +100,7 @@
             <ImageView
                 android:layout_width="@dimen/_30sdp"
                 android:layout_height="@dimen/_30sdp"
-                android:src="@drawable/copy" />
+                android:src="@drawable/ic_copy" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -128,7 +127,7 @@
             <ImageView
                 android:layout_width="@dimen/_30sdp"
                 android:layout_height="@dimen/_30sdp"
-                android:src="@drawable/search" />
+                android:src="@drawable/ic_search" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -155,7 +154,7 @@
             <ImageView
                 android:layout_width="@dimen/_30sdp"
                 android:layout_height="@dimen/_30sdp"
-                android:src="@drawable/share" />
+                android:src="@drawable/ic_share" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -180,12 +179,6 @@
         android:minHeight="@dimen/_30sdp"
         android:padding="@dimen/_2sdp"
         app:layout_constraintTop_toBottomOf="@+id/llOption">
-
-        <ImageView
-            android:layout_width="@dimen/_20sdp"
-            android:layout_height="@dimen/_20sdp"
-            android:src="@drawable/scan" />
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -7,9 +7,10 @@
     android:orientation="vertical">
 
     <ImageView
+        android:layout_marginTop="@dimen/_25sdp"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_160sdp"
-        android:background="@color/colorAccent"
+        android:background="@drawable/img_vip"
         android:orientation="vertical" />
 
     <!--<LinearLayout

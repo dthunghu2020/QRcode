@@ -25,13 +25,16 @@
             android:id="@+id/clItem"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="@dimen/_2sdp">
+            android:paddingStart="@dimen/_2sdp"
+            android:paddingEnd="@dimen/_2sdp"
+            android:paddingTop="@dimen/_10sdp"
+            android:paddingBottom="@dimen/_10sdp">
 
             <FrameLayout
                 android:id="@+id/flLike"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/_2sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -41,50 +44,54 @@
                     android:layout_width="@dimen/_30sdp"
                     android:layout_height="@dimen/_30sdp"
                     android:padding="@dimen/_5sdp"
-                    android:src="@drawable/ic_like" />
+                    android:src="@drawable/ic_like_off" />
 
                 <ImageView
                     android:id="@+id/imgLove"
                     android:layout_width="@dimen/_30sdp"
                     android:layout_height="@dimen/_30sdp"
                     android:padding="@dimen/_5sdp"
-                    android:src="@drawable/ic_love" />
+                    android:src="@drawable/ic_like_on" />
 
             </FrameLayout>
 
-            <CheckBox
-                android:id="@+id/checkbox"
-                android:layout_width="@dimen/_25sdp"
-                android:layout_height="@dimen/_25sdp"
-                android:gravity="center"
+            <FrameLayout
+                android:id="@+id/flImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_10sdp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/imgTypeOfText"
-                android:layout_width="@dimen/_40sdp"
-                android:layout_height="@dimen/_40sdp"
-                android:layout_marginStart="@dimen/_5sdp"
-                android:src="@drawable/shape_conner_blue"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/checkbox"
-                app:layout_constraintTop_toTopOf="parent" />
+                <CheckBox
+                    android:id="@+id/checkbox"
+                    android:layout_width="@dimen/_50sdp"
+                    android:layout_height="@dimen/_50sdp"
+                    android:gravity="center" />
+
+                <ImageView
+                    android:id="@+id/imgTypeOfText"
+                    android:layout_width="@dimen/_50sdp"
+                    android:layout_height="@dimen/_50sdp"
+                    android:src="@drawable/shape_conner_blue" />
+            </FrameLayout>
+
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/_5sdp"
+                android:layout_marginStart="@dimen/_10sdp"
                 android:layout_marginEnd="@dimen/_2sdp"
                 android:layout_marginBottom="@dimen/_2sdp"
                 android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/flLike"
-                app:layout_constraintStart_toEndOf="@id/imgTypeOfText"
+                app:layout_constraintStart_toEndOf="@id/flImage"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
-                    android:id="@+id/txtTitle"
+                    android:id="@+id/txtTitleToolBar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Scan Image"
@@ -107,8 +114,8 @@
                     android:id="@+id/txtData"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:maxLines="3"
                     android:ellipsize="end"
+                    android:maxLines="3"
                     android:text="Body" />
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>

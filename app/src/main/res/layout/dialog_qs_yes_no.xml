@@ -9,7 +9,7 @@
     android:padding="@dimen/_16sdp">
 
     <TextView
-        android:id="@+id/txtTitle"
+        android:id="@+id/txtTitleToolBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Delete"

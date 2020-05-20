@@ -83,9 +83,11 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
 
 
         if (!onCheckBox) {
-            holder.checkbox.setVisibility(View.GONE);
+            holder.checkbox.setVisibility(View.INVISIBLE);
+            holder.imgTypeOfText.setVisibility(View.VISIBLE);
         } else {
             holder.checkbox.setVisibility(View.VISIBLE);
+            holder.imgTypeOfText.setVisibility(View.INVISIBLE);
         }
 
         if (codeData.getLike().equals("Like")) {
@@ -173,7 +175,7 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
         CodeDataHolder(@NonNull View itemView) {
             super(itemView);
             txtHistoryDay = itemView.findViewById(R.id.txtHistoryDay);
-            txtTitle = itemView.findViewById(R.id.txtTitle);
+            txtTitle = itemView.findViewById(R.id.txtTitleToolBar);
             txtTime = itemView.findViewById(R.id.txtTime);
             txtCodeType = itemView.findViewById(R.id.txtCodeType);
             txtData = itemView.findViewById(R.id.txtData);

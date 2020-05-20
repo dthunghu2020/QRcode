@@ -52,10 +52,14 @@ import com.hungdt.qrcode.utils.MySetting;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
+import com.journeyapps.barcodescanner.ViewfinderView;
 import com.journeyapps.barcodescanner.camera.CameraSettings;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements BillingProcessor.IBillingHandler {
 
@@ -67,9 +71,10 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
     private boolean flashlight = false;
     private boolean readyToPurchase = false;
 
-    private ImageView imgMenu, imgScanImage, imgFlashOn, imgFlashOff;
-    private FrameLayout flFlash;
-    private LinearLayout llGenerateCode, llSaved, llLike, llHistory;
+    private TextView txtFlash;
+    private ImageView imgMenu;
+    private CircleImageView imgFlashOn, imgFlashOff;
+    private LinearLayout llGenerateCode, llSaved, llLike, llHistory,llScanImage,llFlash;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
 
@@ -112,6 +117,24 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
 
             }
         });
+
+        //delete camera
+
+        /*ViewfinderView viewFinder = scanner_view.getViewFinder();
+        Field scannerAlphaField = null;
+        try {
+            scannerAlphaField = viewFinder.getClass().getDeclaredField("SCANNER_ALPHA");
+            scannerAlphaField.setAccessible(true);
+            scannerAlphaField.set(viewFinder, new int[65]);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }*/
+
+
+
+
 
         imgMenu.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("RtlHardcoded")
@@ -175,22 +198,24 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
             }
         });
 
-        imgScanImage.setOnClickListener(new View.OnClickListener() {
+        llScanImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 chooseImageScan();
             }
         });
 
-        flFlash.setOnClickListener(new View.OnClickListener() {
+        llFlash.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!flashlight) {
+                    txtFlash.setText("Flash: On");
                     imgFlashOn.setVisibility(View.VISIBLE);
                     imgFlashOff.setVisibility(View.INVISIBLE);
                     scanner_view.setTorchOn();
                     flashlight = true;
                 } else {
+                    txtFlash.setText("Flash: Off");
                     imgFlashOn.setVisibility(View.INVISIBLE);
                     imgFlashOff.setVisibility(View.VISIBLE);
                     scanner_view.setTorchOff();
@@ -235,13 +260,16 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
             }
         });
 
-        checkPermission();
+        if (Build.VERSION.SDK_INT >= 23) {
+            checkPermission();
+        }
+
     }
 
     private void checkPermission() {
-        if ((ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)||(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) ||
+        if ((ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) || (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) ||
                 (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
-            startActivity(new Intent(this,AskPermissionActivity.class));
+            startActivity(new Intent(this, AskPermissionActivity.class));
         }
     }
 
@@ -275,10 +303,11 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
         navigationView = findViewById(R.id.nav_view);
         scanner_view = findViewById(R.id.scanner_view);
         imgMenu = findViewById(R.id.imgMenu);
-        imgScanImage = findViewById(R.id.imgScanImage);
+        llScanImage = findViewById(R.id.llScanImage);
         imgFlashOn = findViewById(R.id.imgFlashOn);
         imgFlashOff = findViewById(R.id.imgFlashOff);
-        flFlash = findViewById(R.id.flFlash);
+        llFlash = findViewById(R.id.llFlash);
+        txtFlash = findViewById(R.id.txtFlash);
         llGenerateCode = findViewById(R.id.llGenerateCode);
         llSaved = findViewById(R.id.llSaved);
         llLike = findViewById(R.id.llLike);

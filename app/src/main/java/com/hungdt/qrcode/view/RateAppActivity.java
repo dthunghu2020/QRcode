@@ -243,41 +243,41 @@ public class RateAppActivity extends AppCompatActivity {
 
     private void setData() {
         if (MySetting.isRateApp(this) == 0) {
-            imgStarLight1.setImageResource(R.drawable.ic_star_un_selected);
-            imgStarLight2.setImageResource(R.drawable.ic_star_un_selected);
-            imgStarLight3.setImageResource(R.drawable.ic_star_un_selected);
-            imgStarLight4.setImageResource(R.drawable.ic_star_un_selected);
-            imgStarLight5.setImageResource(R.drawable.ic_star_un_selected);
+            imgStarLight1.setImageResource(R.drawable.ic_like_off);
+            imgStarLight2.setImageResource(R.drawable.ic_like_off);
+            imgStarLight3.setImageResource(R.drawable.ic_like_off);
+            imgStarLight4.setImageResource(R.drawable.ic_like_off);
+            imgStarLight5.setImageResource(R.drawable.ic_like_off);
         } else if (MySetting.isRateApp(this) == 1) {
-            imgStarLight1.setImageResource(R.drawable.ic_star_selected);
-            imgStarLight2.setImageResource(R.drawable.ic_star_un_selected);
-            imgStarLight3.setImageResource(R.drawable.ic_star_un_selected);
-            imgStarLight4.setImageResource(R.drawable.ic_star_un_selected);
-            imgStarLight5.setImageResource(R.drawable.ic_star_un_selected);
+            imgStarLight1.setImageResource(R.drawable.ic_like_on);
+            imgStarLight2.setImageResource(R.drawable.ic_like_off);
+            imgStarLight3.setImageResource(R.drawable.ic_like_off);
+            imgStarLight4.setImageResource(R.drawable.ic_like_off);
+            imgStarLight5.setImageResource(R.drawable.ic_like_off);
         } else if (MySetting.isRateApp(this) == 2) {
-            imgStarLight1.setImageResource(R.drawable.ic_star_selected);
-            imgStarLight2.setImageResource(R.drawable.ic_star_selected);
-            imgStarLight3.setImageResource(R.drawable.ic_star_un_selected);
-            imgStarLight4.setImageResource(R.drawable.ic_star_un_selected);
-            imgStarLight5.setImageResource(R.drawable.ic_star_un_selected);
+            imgStarLight1.setImageResource(R.drawable.ic_like_on);
+            imgStarLight2.setImageResource(R.drawable.ic_like_on);
+            imgStarLight3.setImageResource(R.drawable.ic_like_off);
+            imgStarLight4.setImageResource(R.drawable.ic_like_off);
+            imgStarLight5.setImageResource(R.drawable.ic_like_off);
         } else if (MySetting.isRateApp(this) == 3) {
-            imgStarLight1.setImageResource(R.drawable.ic_star_selected);
-            imgStarLight2.setImageResource(R.drawable.ic_star_selected);
-            imgStarLight3.setImageResource(R.drawable.ic_star_selected);
-            imgStarLight4.setImageResource(R.drawable.ic_star_un_selected);
-            imgStarLight5.setImageResource(R.drawable.ic_star_un_selected);
+            imgStarLight1.setImageResource(R.drawable.ic_like_on);
+            imgStarLight2.setImageResource(R.drawable.ic_like_on);
+            imgStarLight3.setImageResource(R.drawable.ic_like_on);
+            imgStarLight4.setImageResource(R.drawable.ic_like_off);
+            imgStarLight5.setImageResource(R.drawable.ic_like_off);
         } else if (MySetting.isRateApp(this) == 4) {
-            imgStarLight1.setImageResource(R.drawable.ic_star_selected);
-            imgStarLight2.setImageResource(R.drawable.ic_star_selected);
-            imgStarLight3.setImageResource(R.drawable.ic_star_selected);
-            imgStarLight4.setImageResource(R.drawable.ic_star_selected);
-            imgStarLight5.setImageResource(R.drawable.ic_star_un_selected);
+            imgStarLight1.setImageResource(R.drawable.ic_like_on);
+            imgStarLight2.setImageResource(R.drawable.ic_like_on);
+            imgStarLight3.setImageResource(R.drawable.ic_like_on);
+            imgStarLight4.setImageResource(R.drawable.ic_like_on);
+            imgStarLight5.setImageResource(R.drawable.ic_like_off);
         } else if (MySetting.isRateApp(this) == 5) {
-            imgStarLight1.setImageResource(R.drawable.ic_star_selected);
-            imgStarLight2.setImageResource(R.drawable.ic_star_selected);
-            imgStarLight3.setImageResource(R.drawable.ic_star_selected);
-            imgStarLight4.setImageResource(R.drawable.ic_star_selected);
-            imgStarLight5.setImageResource(R.drawable.ic_star_selected);
+            imgStarLight1.setImageResource(R.drawable.ic_like_on);
+            imgStarLight2.setImageResource(R.drawable.ic_like_on);
+            imgStarLight3.setImageResource(R.drawable.ic_like_on);
+            imgStarLight4.setImageResource(R.drawable.ic_like_on);
+            imgStarLight5.setImageResource(R.drawable.ic_like_on);
         }
 
 

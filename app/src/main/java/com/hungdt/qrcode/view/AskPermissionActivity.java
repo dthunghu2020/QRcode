@@ -26,17 +26,14 @@ import com.hungdt.qrcode.R;
 import java.util.Objects;
 
 public class AskPermissionActivity extends AppCompatActivity {
-    private Button btnSet;
-    private static final int CAMERA_PERMISSION_CODE = 100;
-    private static final int STORAGE_PERMISSION_CODE = 101;
+    private static final int PERMISSION_CODE = 100;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ask_permission);
 
-        btnSet = findViewById(R.id.btnSet);
-
+        Button btnSet = findViewById(R.id.btnSet);
 
         btnSet.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -49,56 +46,42 @@ public class AskPermissionActivity extends AppCompatActivity {
 
 
     private void askCameraPermissions() {
-        if ((ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)) {
-            askExternalStoragePermission();
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
-        }
-    }
-
-    private void askExternalStoragePermission() {
-        if ((ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) &&
-                (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
-            finish();
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
+        if (Build.VERSION.SDK_INT >= 23) {
+            if ((ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) &&
+                    (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
+                finish();
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_CODE);
+            }
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case CAMERA_PERMISSION_CODE:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //Toast.makeText(EditPlanActivity.this, "Permission CAMERA_PERMISSION_CODE Granted", Toast.LENGTH_SHORT).show();
-                    // do your work here
-                    askExternalStoragePermission();
-                } else if (Build.VERSION.SDK_INT >= 23 && !shouldShowRequestPermissionRationale(permissions[0])) {
-                    //Toast.makeText(EditPlanActivity.this, "CAMERA_PERMISSION_CODE Go to Settings and Grant the permission to use this feature.", Toast.LENGTH_SHORT).show();
-                    // User selected the Never Ask Again Option
+        if (requestCode == PERMISSION_CODE) {
+            if (grantResults.length > 0 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                    grantResults[1] == PackageManager.PERMISSION_GRANTED &&
+                    grantResults[2] == PackageManager.PERMISSION_GRANTED) {
+                // do your work here
+                finish();
+                Toast.makeText(this, "All permission accepted!", Toast.LENGTH_SHORT).show();
+            } else if (Build.VERSION.SDK_INT >= 23) {
+                // User selected the Never Ask Again Option
+                if(!shouldShowRequestPermissionRationale(permissions[0]) ||
+                        !shouldShowRequestPermissionRationale(permissions[1]) ||
+                        !shouldShowRequestPermissionRationale(permissions[2])){
                     //Cái này bật setting trên màn hình app
                     openSettingPermissionDialog();
-                    //Cái này sẽ bật tab trên hệ thống.
+                }
+
+                //Cái này sẽ bật tab trên hệ thống.
                     /*Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                             Uri.fromParts("package", getPackageName(), null));
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);*/
-                } else {
-                    //Toast.makeText(EditPlanActivity.this, "Permission CAMERA_PERMISSION_CODE Denied", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            case STORAGE_PERMISSION_CODE:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //Toast.makeText(EditPlanActivity.this, "Permission GALLERY_PERMISSION_CODE Granted", Toast.LENGTH_SHORT).show();
-                    finish();
-                } else if (Build.VERSION.SDK_INT >= 23 && !shouldShowRequestPermissionRationale(permissions[0])) {
-                    //Toast.makeText(EditPlanActivity.this, "GALLERY_PERMISSION_CODE Go to Settings and Grant the permission to use this feature.", Toast.LENGTH_SHORT).show();
-                    openSettingPermissionDialog();
-                } else {
-                    //Toast.makeText(EditPlanActivity.this, "Permission GALLERY_PERMISSION_CODE Denied", Toast.LENGTH_SHORT).show();
-                }
-                break;
+            }
         }
     }
 
@@ -106,7 +89,7 @@ public class AskPermissionActivity extends AppCompatActivity {
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_qs_yes_no);
 
-        TextView txtTitle = dialog.findViewById(R.id.txtTitle);
+        TextView txtTitle = dialog.findViewById(R.id.txtTitleToolBar);
         TextView txtBody = dialog.findViewById(R.id.txtBody);
         final Button btnYes = dialog.findViewById(R.id.btnYes);
         final Button btnNo = dialog.findViewById(R.id.btnNo);
@@ -138,4 +121,15 @@ public class AskPermissionActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    public void exitApp () {
+
+        finishAffinity();
+        System.exit(0);
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        exitApp();
+    }
 }

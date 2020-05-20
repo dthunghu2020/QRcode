@@ -19,7 +19,7 @@
         <ImageView
             android:layout_width="@dimen/_27sdp"
             android:layout_height="@dimen/_27sdp"
-            android:layout_marginStart="@dimen/_80sdp"
+            android:layout_marginStart="@dimen/_20sdp"
             android:background="@drawable/shape_conner_blue" />
 
         <TextView
@@ -43,8 +43,8 @@
         <ImageView
             android:layout_width="@dimen/_27sdp"
             android:layout_height="@dimen/_27sdp"
-            android:layout_marginStart="@dimen/_80sdp"
-            android:background="@drawable/ic_gallery"
+            android:layout_marginStart="@dimen/_20sdp"
+            android:background="@drawable/ic_scan_image"
             android:padding="@dimen/_1sdp" />
 
         <TextView

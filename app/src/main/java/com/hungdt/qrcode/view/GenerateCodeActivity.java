@@ -2,7 +2,6 @@ package com.hungdt.qrcode.view;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -372,9 +371,9 @@ public class GenerateCodeActivity extends AppCompatActivity {
     }
 
     private void invisibleView() {
-        llSaveCodeGenerate.setVisibility(View.INVISIBLE);
-        llShareCodeGenerate.setVisibility(View.INVISIBLE);
-        imgCodeGenerate.setVisibility(View.INVISIBLE);
+        llSaveCodeGenerate.setVisibility(View.GONE);
+        llShareCodeGenerate.setVisibility(View.GONE);
+        imgCodeGenerate.setVisibility(View.GONE);
     }
 
     private void visibleView() {
@@ -425,7 +424,7 @@ public class GenerateCodeActivity extends AppCompatActivity {
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_qs_yes_no);
 
-        TextView txtTitle =dialog.findViewById(R.id.txtTitle);
+        TextView txtTitle =dialog.findViewById(R.id.txtTitleToolBar);
         TextView txtBody =dialog.findViewById(R.id.txtBody);
         Button btnYes = dialog.findViewById(R.id.btnYes);
         Button btnNo = dialog.findViewById(R.id.btnNo);

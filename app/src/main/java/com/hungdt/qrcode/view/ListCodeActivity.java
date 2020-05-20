@@ -5,12 +5,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,11 +31,15 @@ public class ListCodeActivity extends AppCompatActivity {
     private List<CodeData> dataList = new ArrayList<>();
     private CodeDataAdapter codeDataAdapter;
     private RecyclerView rcvCodeData;
-    private ImageView imgBack, imgDelete, imgCheckAll;
-    private TextView txtTitle, txtBack;
-    private boolean onDelete = false;
+    private ImageView imgBack, imgDelete,imgTitle;
+    private TextView txtToolBar,txtTitle,txtBody,txtTitleItem;
+    private CardView cvTitle,cvSelectAll;
+    private Button btnDelete;
+    private ConstraintLayout clTitleItem;
 
+    private boolean onDelete = false;
     private int positionSave;
+    private String title;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,22 +47,34 @@ public class ListCodeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_list_code);
         initView();
 
-        //todo
-        //String[] Ids
-
         dataList.clear();
         Intent intent = getIntent();
-        final String title = intent.getStringExtra(KEY.TYPE_VIEW);
-        txtTitle.setText(title);
+         title = intent.getStringExtra(KEY.TYPE_VIEW);
+
         assert title != null;
         switch (title) {
             case KEY.HISTORY:
+                imgTitle.setBackgroundResource(R.drawable.image_history);
+                txtTitle.setText("Check");
+                txtTitle.append("Your History");
+                txtBody.setText("Show your History");
+                txtTitleItem.setText("All History");
                 dataList.addAll(DBHelper.getInstance(this).getAllData());
                 break;
             case KEY.SAVED:
+                txtTitle.setText("Check");
+                txtTitle.append("Your Saved");
+                txtBody.setText("Show your Saved");
+                txtTitleItem.setText("All Saved");
+                imgTitle.setBackgroundResource(R.drawable.image_generate);
                 dataList.addAll(DBHelper.getInstance(this).getCodeSaved());
                 break;
             case KEY.LIKE:
+                txtTitle.setText("Check");
+                txtTitle.append("Your Favorite");
+                txtBody.setText("Show your Favorite");
+                txtTitleItem.setText("All Favorite");
+                imgTitle.setBackgroundResource(R.drawable.image_favorite);
                 dataList.addAll(DBHelper.getInstance(this).getAllCodeLike());
                 break;
         }
@@ -65,51 +83,45 @@ public class ListCodeActivity extends AppCompatActivity {
         codeDataAdapter = new CodeDataAdapter(this, dataList);
         rcvCodeData.setLayoutManager(new LinearLayoutManager(this));
         rcvCodeData.setAdapter(codeDataAdapter);
-        viewOffCheckBox();
+        viewOffDelete();
 
-        imgBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-
-        //ok
         imgDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!onDelete) {
-                    viewOnCheckBox();
+                    viewOnDelete();
                     codeDataAdapter.enableCheckBox();
                     codeDataAdapter.notifyDataSetChanged();
                     onDelete = true;
-                } else {
-                    //sau khi checkbox xong và thực hiện xóa
-                    for (int i = 0; i < dataList.size(); i++) {
-                        if (dataList.get(i).isTicked()) {
-                            DBHelper.getInstance(ListCodeActivity.this).deleteOneCodeData(dataList.get(i).getId());
-                        }
-                    }
-                    dataList.clear();
-                    switch (title) {
-                        case KEY.HISTORY:
-                            dataList.addAll(DBHelper.getInstance(ListCodeActivity.this).getAllData());
-                            break;
-                        case KEY.SAVED:
-                            dataList.addAll(DBHelper.getInstance(ListCodeActivity.this).getCodeSaved());
-                            break;
-                        case KEY.LIKE:
-                            dataList.addAll(DBHelper.getInstance(ListCodeActivity.this).getAllCodeLike());
-                            break;
-                    }
-                    Collections.reverse(dataList);
-                    disableViewCheckBox();
-                    onDelete=false;
-                }
             }
         });
-        //OK
-        imgCheckAll.setOnClickListener(new View.OnClickListener() {
+
+        btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                for (int i = 0; i < dataList.size(); i++) {
+                    if (dataList.get(i).isTicked()) {
+                        DBHelper.getInstance(ListCodeActivity.this).deleteOneCodeData(dataList.get(i).getId());
+                    }
+                }
+                dataList.clear();
+                switch (title) {
+                    case KEY.HISTORY:
+                        dataList.addAll(DBHelper.getInstance(ListCodeActivity.this).getAllData());
+                        break;
+                    case KEY.SAVED:
+                        dataList.addAll(DBHelper.getInstance(ListCodeActivity.this).getCodeSaved());
+                        break;
+                    case KEY.LIKE:
+                        dataList.addAll(DBHelper.getInstance(ListCodeActivity.this).getAllCodeLike());
+                        break;
+                }
+                Collections.reverse(dataList);
+                disableViewCheckBox();
+                onDelete=false;
+            }
+        });
+
+        cvSelectAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 for(int i = 0;i<dataList.size();i++){
@@ -119,10 +131,10 @@ public class ListCodeActivity extends AppCompatActivity {
             }
         });
 
-        txtBack.setOnClickListener(new View.OnClickListener() {
+        imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                disableViewCheckBox();
+                onBackPressed();
             }
         });
 
@@ -150,8 +162,8 @@ public class ListCodeActivity extends AppCompatActivity {
 
     private void disableViewCheckBox() {
         setDefaultTick();
-        txtBack.setVisibility(View.GONE);
-        imgCheckAll.setVisibility(View.GONE);
+        imgBack.setVisibility(View.GONE);
+        cvSelectAll.setVisibility(View.GONE);
         codeDataAdapter.disableCheckBox();
         codeDataAdapter.notifyDataSetChanged();
         onDelete = false;
@@ -167,14 +179,20 @@ public class ListCodeActivity extends AppCompatActivity {
         }
     }
 
-    private void viewOnCheckBox() {
-        txtBack.setVisibility(View.VISIBLE);
-        imgCheckAll.setVisibility(View.VISIBLE);
+    private void viewOnDelete() {
+        txtToolBar.setText("Delete "+title);
+        cvTitle.setVisibility(View.GONE);
+        clTitleItem.setVisibility(View.GONE);
+        cvSelectAll.setVisibility(View.VISIBLE);
+        btnDelete.setVisibility(View.VISIBLE);
     }
 
-    private void viewOffCheckBox() {
-        txtBack.setVisibility(View.GONE);
-        imgCheckAll.setVisibility(View.GONE);
+    private void viewOffDelete() {
+        txtToolBar.setText(title);
+        cvTitle.setVisibility(View.VISIBLE);
+        clTitleItem.setVisibility(View.VISIBLE);
+        cvSelectAll.setVisibility(View.GONE);
+        btnDelete.setVisibility(View.GONE);
     }
 
     @Override
@@ -202,12 +220,21 @@ public class ListCodeActivity extends AppCompatActivity {
         }
     }
 
+
     private void initView() {
+        txtToolBar = findViewById(R.id.txtToolBar);
+        imgTitle = findViewById(R.id.imgTitle);
+        imgDelete = findViewById(R.id.imgDelete);
         txtTitle = findViewById(R.id.txtTitle);
-        txtBack = findViewById(R.id.txtBack);
+        txtBody = findViewById(R.id.txtBody);
+        txtTitleItem = findViewById(R.id.txtTitleItem);
+        cvTitle = findViewById(R.id.cvTitle);
+        clTitleItem = findViewById(R.id.clTitleItem);
+        cvSelectAll = findViewById(R.id.cvSelectAll);
+        btnDelete = findViewById(R.id.btnDelete);
+        imgBack = findViewById(R.id.imgBack);
         rcvCodeData = findViewById(R.id.rcvCodeData);
         imgBack = findViewById(R.id.imgBack);
-        imgCheckAll = findViewById(R.id.imgCheckAll);
         imgDelete = findViewById(R.id.imgDelete);
     }
 

@@ -35,11 +35,11 @@
 
                 <ImageView
                     android:layout_marginStart="@dimen/_25sdp"
-                    android:layout_marginEnd="@dimen/_30sdp"
+                    android:layout_marginEnd="@dimen/_25sdp"
                     android:layout_width="match_parent"
-                    android:layout_height="220dp"
+                    android:layout_height="230dp"
                     android:layout_gravity="center"
-                    android:background="@drawable/ic_gallery"
+                    android:background="@drawable/img_vip"
                     android:padding="10dp" />
 
                 <FrameLayout
@@ -70,7 +70,7 @@
                             android:layout_width="30dp"
                             android:layout_height="30dp"
                             android:padding="7dp"
-                            android:src="@drawable/ic_x"
+                            android:src="@drawable/ic_back"
                             android:tint="@color/black" />
                     </LinearLayout>
                 </FrameLayout>
@@ -132,7 +132,7 @@
                         android:layout_height="35dp"
                         android:layout_marginRight="5dp"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_star_un_selected" />
+                        android:src="@drawable/ic_like_off" />
 
                     <ImageView
                         android:id="@+id/imgStarLight2Rate"
@@ -140,7 +140,7 @@
                         android:layout_height="35dp"
                         android:layout_marginRight="5dp"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_star_un_selected" />
+                        android:src="@drawable/ic_like_off" />
 
                     <ImageView
                         android:id="@+id/imgStarLight3Rate"
@@ -148,7 +148,7 @@
                         android:layout_height="35dp"
                         android:layout_marginRight="5dp"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_star_un_selected" />
+                        android:src="@drawable/ic_like_off" />
 
                     <ImageView
                         android:id="@+id/imgStarLight4Rate"
@@ -156,7 +156,7 @@
                         android:layout_height="35dp"
                         android:layout_marginRight="5dp"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_star_un_selected" />
+                        android:src="@drawable/ic_like_off" />
 
                     <ImageView
                         android:id="@+id/imgStarLight5Rate"
@@ -164,7 +164,7 @@
                         android:layout_height="35dp"
                         android:layout_marginRight="5dp"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_star_un_selected" />
+                        android:src="@drawable/ic_like_off" />
                 </LinearLayout>
 
             </LinearLayout>
