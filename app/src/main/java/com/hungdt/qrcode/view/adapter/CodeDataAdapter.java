@@ -19,11 +19,13 @@ import com.hungdt.qrcode.R;
 import com.hungdt.qrcode.database.DBHelper;
 import com.hungdt.qrcode.dataset.Constant;
 import com.hungdt.qrcode.model.CodeData;
+import com.hungdt.qrcode.utils.KEY;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDataHolder> {
 
@@ -48,13 +50,11 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
     @Override
     public void onBindViewHolder(@NonNull final CodeDataHolder holder, final int position) {
 
-        final CodeData codeData = listData.get(position);
-
         @SuppressLint("SimpleDateFormat") final SimpleDateFormat sdfDate = new SimpleDateFormat(Constant.getDateFormat());
         @SuppressLint("SimpleDateFormat") final SimpleDateFormat sdfDateTime = new SimpleDateFormat(Constant.getDateTimeFormat());
         Date date;
         try {
-            date = sdfDateTime.parse(codeData.getCreateTime());
+            date = sdfDateTime.parse(listData.get(position).getCreateTime());
             if (date != null) {
                 if (position == 0) {
                     holder.txtHistoryDay.setVisibility(View.VISIBLE);
@@ -76,10 +76,39 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
         }
 
 
-        holder.txtTitle.setText(codeData.getCreateAt());
-        holder.txtTime.setText(codeData.getCreateTime());
-        holder.txtCodeType.setText(codeData.getType());
-        holder.txtData.setText(codeData.getData());
+        holder.txtTitle.setText(listData.get(position).getCreateAt());
+        holder.txtTime.setText(listData.get(position).getCreateTime());
+        holder.txtCodeType.setText(listData.get(position).getCodeType());
+        holder.txtData.setText(listData.get(position).getData());
+        switch (listData.get(position).getTextType()){
+            case KEY.GOOD:
+                holder.imgTypeOfText.setImageResource(R.drawable.ic_goods);
+                break;
+            case KEY.LINK:
+                holder.imgTypeOfText.setImageResource(R.drawable.ic_link);
+                break;
+            case KEY.PHONE:
+                holder.imgTypeOfText.setImageResource(R.drawable.ic_phone_number);
+                break;
+            case KEY.EMAIL:
+                holder.imgTypeOfText.setImageResource(R.drawable.ic_mail);
+                break;
+            case KEY.ADDRESS:
+                holder.imgTypeOfText.setImageResource(R.drawable.ic_location);
+                break;
+            case KEY.WIFI:
+                holder.imgTypeOfText.setImageResource(R.drawable.ic_wifi);
+                break;
+            case KEY.CALENDER:
+                holder.imgTypeOfText.setImageResource(R.drawable.ic_calendar);
+                break;
+            case KEY.SMS:
+                holder.imgTypeOfText.setImageResource(R.drawable.ic_messenger);
+                break;
+            case KEY.TEXT:
+                holder.imgTypeOfText.setImageResource(R.drawable.ic_text);
+                break;
+        }
 
 
         if (!onCheckBox) {
@@ -90,13 +119,13 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
             holder.imgTypeOfText.setVisibility(View.INVISIBLE);
         }
 
-        if (codeData.getLike().equals("Like")) {
+        if (listData.get(position).getLike().equals("Like")) {
             setViewLike(holder);
         } else {
             setViewLove(holder);
         }
 
-        if (codeData.isTicked()) {
+        if (listData.get(position).isTicked()) {
             holder.checkbox.setChecked(true);
         } else {
             holder.checkbox.setChecked(false);
@@ -106,17 +135,17 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
             @Override
             public void onClick(View v) {
                 if (!onCheckBox) {
-                    if (codeData.getLike().equals("Like")) {
+                    if (listData.get(position).getLike().equals("Like")) {
                         setViewLove(holder);
-                        codeData.setLike("Love");
-                        DBHelper.getInstance(layoutInflater.getContext()).setLike(codeData.getId(), "Love");
+                        listData.get(position).setLike("Love");
+                        DBHelper.getInstance(layoutInflater.getContext()).setLike(listData.get(position).getId(), "Love");
                     } else {
                         setViewLike(holder);
-                        codeData.setLike("Like");
-                        DBHelper.getInstance(layoutInflater.getContext()).setLike(codeData.getId(), "Like");
+                        listData.get(position).setLike("Like");
+                        DBHelper.getInstance(layoutInflater.getContext()).setLike(listData.get(position).getId(), "Like");
                     }
                 } else {
-                    setClickITem(codeData, holder);
+                    setClickITem( listData.get(position), holder);
                 }
             }
         });
@@ -124,10 +153,11 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
         holder.clItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                onDetailCodeItemClickListener.OnItemClicked(holder.getAdapterPosition(), onCheckBox,listData.get(position).isTicked());
                 if (onCheckBox) {
-                    setClickITem(codeData, holder);
+                    setClickITem( listData.get(position), holder);
                 }
-                onDetailCodeItemClickListener.OnItemClicked(holder.getAdapterPosition(), onCheckBox);
+
             }
         });
         holder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -144,8 +174,10 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
 
     private void setClickITem(CodeData codeData, CodeDataHolder holder) {
         if (codeData.isTicked()) {
+            codeData.setTicked(false);
             holder.checkbox.setChecked(false);
         } else {
+            codeData.setTicked(true);
             holder.checkbox.setChecked(true);
         }
     }
@@ -175,7 +207,7 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
         CodeDataHolder(@NonNull View itemView) {
             super(itemView);
             txtHistoryDay = itemView.findViewById(R.id.txtHistoryDay);
-            txtTitle = itemView.findViewById(R.id.txtTitleToolBar);
+            txtTitle = itemView.findViewById(R.id.txtCreateAt);
             txtTime = itemView.findViewById(R.id.txtTime);
             txtCodeType = itemView.findViewById(R.id.txtCodeType);
             txtData = itemView.findViewById(R.id.txtData);
@@ -193,7 +225,7 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
     }
 
     public interface OnDetailCodeItemClickListener {
-        void OnItemClicked(int position, boolean checkBox);
+        void OnItemClicked(int position, boolean checkBox,boolean isTicked);
     }
 
     public void enableCheckBox() {

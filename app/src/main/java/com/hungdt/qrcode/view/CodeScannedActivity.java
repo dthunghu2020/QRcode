@@ -7,7 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -25,12 +27,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.regex.Pattern;
 
 public class CodeScannedActivity extends AppCompatActivity {
 
     private ImageView imgBack, imgResultImage;
-    private TextView txtResultCode, txtTitle, txtNotification;
-    private LinearLayout llCopyText, llShare, llSearch, llNewScan;
+    private TextView txtResultCode, txtTitleToolBar, txtTitle, txtCreateAt, txtTime, txtCodeType, txtTextType;
+    private LinearLayout llCopyText, llShare, llSearch;
+    private Button btnNewScan;
 
     private String codeText;
 
@@ -47,33 +51,55 @@ public class CodeScannedActivity extends AppCompatActivity {
         Intent intent = getIntent();
         codeText = intent.getStringExtra(KEY.RESULT_TEXT);
         String typeCode = intent.getStringExtra(KEY.RESULT_TYPE_CODE);
-        String typeCreate = intent.getStringExtra(KEY.TYPE_CREATE);
+        String typeCreate = intent.getStringExtra(KEY.TYPE);
+        String typeText;
+        assert typeCode != null;
+        if (typeCode.equals("EAN_13") || typeCode.equals("EAN_8")) {
+            typeText = "Good";
+        } else {
+            if (Pattern.matches(KEY.LINK_PATTERN, codeText)) {
+                typeText = "Link";
+            } else if (Pattern.matches(KEY.PHONE_PATTERN, codeText)) {
+                typeText = "Phone";
+            } else if (Pattern.matches(KEY.EMAIL_PATTERN, codeText)) {
+                typeText = "Email";
+            } else if (Pattern.matches(KEY.ADDRESS_PATTERN, codeText)) {
+                typeText = "Address";
+            } else if (Pattern.matches(KEY.WIFI_PATTERN, codeText)) {
+                typeText = "Wifi";
+            } else if (Pattern.matches(KEY.CALENDAR_PATTERN, codeText)) {
+                typeText = "Calender";
+            } else if (Pattern.matches(KEY.SMS_PATTERN, codeText)) {
+                typeText = "SMS";
+            } else {
+                typeText = "Text";
+            }
+        }
 
-        DBHelper.getInstance(this).addData(codeText, typeCode, getInstantDateTime(), typeCreate, "No", "Like", "");
 
-        /*if (intent.hasExtra(KEY.RESULT_BITMAP)) {
-            bitmapResult = BitmapFactory.decodeByteArray(getIntent().getByteArrayExtra(KEY.RESULT_BITMAP),
-                    0,
-                    Objects.requireNonNull(intent.getByteArrayExtra(KEY.RESULT_BITMAP)).length);
-            imgResultImage.setImageBitmap(bitmapResult);
-        }*/
+        DBHelper.getInstance(this).addData(codeText, typeCode, typeText, getInstantDateTime(), typeCreate, "No", "Like", "");
 
         assert typeCreate != null;
         switch (typeCreate) {
             case KEY.TYPE_SCAN_CAMERA:
-                txtTitle.setText("Camera Scan");
+                txtTitleToolBar.setText("Camera Scan");
                 break;
             case KEY.TYPE_SCAN_GALLERY:
-                txtTitle.setText("Image Scan");
+                txtTitleToolBar.setText("Scan Image");
                 break;
         }
         if (codeText == null) {
-            txtNotification.setText("Scan Fail!");
-            txtNotification.setTextColor(getResources().getColor(R.color.red));
+            txtTitle.setText("Scan Fail!");
+            txtTitle.setTextColor(getResources().getColor(R.color.red));
         } else {
             txtResultCode.setText(codeText);
-            txtNotification.setTextColor(getResources().getColor(R.color.colorAccent));
+            txtTitle.setText("Scan Success!");
+            txtTitle.setTextColor(getResources().getColor(R.color.colorAccent));
         }
+        txtCreateAt.setText("From: " + typeCreate);
+        txtTime.setText("Time: " + getInstantDateTime());
+        txtCodeType.setText("Code: " + typeCode);
+        txtTextType.setText("Type: "+typeText);
 
         imgResultImage.setImageBitmap(MainActivity.BITMAP);
 
@@ -118,7 +144,7 @@ public class CodeScannedActivity extends AppCompatActivity {
             }
         });
 
-        llNewScan.setOnClickListener(new View.OnClickListener() {
+        btnNewScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
@@ -142,11 +168,15 @@ public class CodeScannedActivity extends AppCompatActivity {
 
     private void initView() {
         imgBack = findViewById(R.id.imgBack);
-        imgResultImage = findViewById(R.id.imgDetailImage);
-        txtResultCode = findViewById(R.id.txtDetailCode);
-        txtNotification = findViewById(R.id.txtNotification);
-        txtTitle = findViewById(R.id.txtTitleToolBar);
-        llNewScan = findViewById(R.id.llNewScan);
+        imgResultImage = findViewById(R.id.imgResultImage);
+        txtResultCode = findViewById(R.id.txtResultCode);
+        txtCreateAt = findViewById(R.id.txtCreateAt);
+        txtTime = findViewById(R.id.txtTime);
+        txtTextType = findViewById(R.id.txtTextType);
+        txtCodeType = findViewById(R.id.txtCodeType);
+        txtTitle = findViewById(R.id.txtTitle);
+        txtTitleToolBar = findViewById(R.id.txtTitleToolBar);
+        btnNewScan = findViewById(R.id.btnNewScan);
         llCopyText = findViewById(R.id.llCopyText);
         llShare = findViewById(R.id.llShare);
         llSearch = findViewById(R.id.llSearch);

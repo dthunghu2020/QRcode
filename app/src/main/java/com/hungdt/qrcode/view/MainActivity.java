@@ -3,7 +3,6 @@ package com.hungdt.qrcode.view;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -11,24 +10,19 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -52,12 +46,11 @@ import com.hungdt.qrcode.utils.MySetting;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
-import com.journeyapps.barcodescanner.ViewfinderView;
 import com.journeyapps.barcodescanner.camera.CameraSettings;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -72,9 +65,9 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
     private boolean readyToPurchase = false;
 
     private TextView txtFlash;
-    private ImageView imgMenu;
+    private ImageView imgMenu,imgRemoveAds,imgGift;
     private CircleImageView imgFlashOn, imgFlashOff;
-    private LinearLayout llGenerateCode, llSaved, llLike, llHistory,llScanImage,llFlash;
+    private LinearLayout llGenerateCode, llSaved, llLike, llHistory, llScanImage, llFlash;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
 
@@ -96,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
         }
 
         initView();
+        final Animation animationRotate = AnimationUtils.loadAnimation(this,R.anim.anim_rotate);
+        imgGift.startAnimation(animationRotate);
         imgFlashOn.setVisibility(View.INVISIBLE);
 
         CameraSettings cameraSettings = new CameraSettings();
@@ -131,9 +126,6 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }*/
-
-
-
 
 
         imgMenu.setOnClickListener(new View.OnClickListener() {
@@ -246,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, ListCodeActivity.class);
-                intent.putExtra(KEY.TYPE_VIEW, KEY.LIKE);
+                intent.putExtra(KEY.TYPE_VIEW, KEY.FAVORITE);
                 startActivity(intent);
             }
         });
@@ -257,6 +249,25 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
                 Intent intent = new Intent(MainActivity.this, ListCodeActivity.class);
                 intent.putExtra(KEY.TYPE_VIEW, KEY.HISTORY);
                 startActivity(intent);
+            }
+        });
+
+        imgRemoveAds.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    removeAds();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
+        imgGift.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "Daily Reward!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -303,6 +314,8 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
         navigationView = findViewById(R.id.nav_view);
         scanner_view = findViewById(R.id.scanner_view);
         imgMenu = findViewById(R.id.imgMenu);
+        imgRemoveAds = findViewById(R.id.imgRemoveAds);
+        imgGift = findViewById(R.id.imgGift);
         llScanImage = findViewById(R.id.llScanImage);
         imgFlashOn = findViewById(R.id.imgFlashOn);
         imgFlashOff = findViewById(R.id.imgFlashOff);
@@ -353,7 +366,7 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
 
     private void scanQRImage(Bitmap bMap) {
         String data = null;
-        String type = null;
+        String typeCode = null;
         int[] intArray = new int[bMap.getWidth() * bMap.getHeight()];
         //copy pixel data from the Bitmap into the 'intArray' array
         bMap.getPixels(intArray, 0, bMap.getWidth(), 0, 0, bMap.getWidth(), bMap.getHeight());
@@ -365,15 +378,15 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
         try {
             Result result = reader.decode(bitmap);
             data = result.getText();
-            type = result.getBarcodeFormat().toString();
-            Log.e("123123", "scanQRImage: " + data);
+            typeCode = result.getBarcodeFormat().toString();
+            Log.e("123123", "scanQRImage: \n" + data);
         } catch (Exception e) {
-            Log.e("QrTest", "Error decoding barcode", e);
+            //Log.e("QrTest", "Error decoding barcode", e);
         }
 
         Intent intent = new Intent(MainActivity.this, CodeScannedActivity.class);
         intent.putExtra(KEY.RESULT_TEXT, data);
-        intent.putExtra(KEY.RESULT_TYPE_CODE, type);
+        intent.putExtra(KEY.RESULT_TYPE_CODE, typeCode);
         intent.putExtra(KEY.TYPE_CREATE, KEY.TYPE_SCAN_GALLERY);
         startActivity(intent);
     }

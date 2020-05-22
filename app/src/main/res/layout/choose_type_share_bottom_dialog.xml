@@ -20,7 +20,7 @@
             android:layout_width="@dimen/_27sdp"
             android:layout_height="@dimen/_27sdp"
             android:layout_marginStart="@dimen/_20sdp"
-            android:background="@drawable/shape_conner_blue" />
+            android:src="@drawable/ic_share_text" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -44,7 +44,7 @@
             android:layout_width="@dimen/_27sdp"
             android:layout_height="@dimen/_27sdp"
             android:layout_marginStart="@dimen/_20sdp"
-            android:background="@drawable/ic_scan_image"
+            android:src="@drawable/ic_share_image"
             android:padding="@dimen/_1sdp" />
 
         <TextView

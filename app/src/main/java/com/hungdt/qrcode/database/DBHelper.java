@@ -24,6 +24,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COLUMN_CODE_ID = "CODE_ID";
     public static final String COLUMN_CODE_DATA = "CODE_DATA";
     public static final String COLUMN_CODE_TYPE = "CODE_TYPE";
+    public static final String COLUMN_TEXT_TYPE = "TEXT_TYPE";
     public static final String COLUMN_CODE_CREATE_TIME = "CREATE_TIME";
     public static final String COLUMN_CODE_CREATE_AT = "CREATE_AT";
     public static final String COLUMN_CODE_SAVE = "CREATE_SAVE";
@@ -34,6 +35,7 @@ public class DBHelper extends SQLiteOpenHelper {
             + COLUMN_CODE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COLUMN_CODE_DATA + " TEXT NOT NULL, "
             + COLUMN_CODE_TYPE + " TEXT NOT NULL, "
+            + COLUMN_TEXT_TYPE + " TEXT NOT NULL, "
             + COLUMN_CODE_CREATE_TIME + " TEXT NOT NULL, "
             + COLUMN_CODE_CREATE_AT + " TEXT NOT NULL, "
             + COLUMN_CODE_SAVE + " TEXT NOT NULL, "
@@ -51,12 +53,13 @@ public class DBHelper extends SQLiteOpenHelper {
         return instance;
     }
 
-    public void addData(String codeData, String codeType, String time, String from, String save, String like, String note) {
+    public void addData(String codeData, String codeType,String textType, String time, String from, String save, String like, String note) {
         SQLiteDatabase database = instance.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(COLUMN_CODE_DATA, codeData);
         values.put(COLUMN_CODE_TYPE, codeType);
+        values.put(COLUMN_TEXT_TYPE, textType);
         values.put(COLUMN_CODE_CREATE_TIME, time);
         values.put(COLUMN_CODE_CREATE_AT, from);
         values.put(COLUMN_CODE_SAVE, save);
@@ -87,6 +90,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     codeData.add(new CodeData(cursor.getString(cursor.getColumnIndex(COLUMN_CODE_ID)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_DATA)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_TYPE)),
+                            cursor.getString(cursor.getColumnIndex(COLUMN_TEXT_TYPE)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_CREATE_TIME)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_CREATE_AT)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_SAVE)),
@@ -112,6 +116,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     codeData.add(new CodeData(cursor.getString(cursor.getColumnIndex(COLUMN_CODE_ID)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_DATA)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_TYPE)),
+                            cursor.getString(cursor.getColumnIndex(COLUMN_TEXT_TYPE)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_CREATE_TIME)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_CREATE_AT)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_SAVE)),
@@ -137,6 +142,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     codeData.add(new CodeData(cursor.getString(cursor.getColumnIndex(COLUMN_CODE_ID)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_DATA)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_TYPE)),
+                            cursor.getString(cursor.getColumnIndex(COLUMN_TEXT_TYPE)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_CREATE_TIME)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_CREATE_AT)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_SAVE)),
@@ -170,6 +176,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 data.add(new CodeData(cursor.getString(cursor.getColumnIndex(COLUMN_CODE_ID)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_CODE_DATA)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_CODE_TYPE)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_TEXT_TYPE)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_CODE_CREATE_TIME)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_CODE_CREATE_AT)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_CODE_SAVE)),
@@ -194,6 +201,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     codeData = new CodeData(id,
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_DATA)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_TYPE)),
+                            cursor.getString(cursor.getColumnIndex(COLUMN_TEXT_TYPE)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_CREATE_TIME)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_CREATE_AT)),
                             cursor.getString(cursor.getColumnIndex(COLUMN_CODE_SAVE)),

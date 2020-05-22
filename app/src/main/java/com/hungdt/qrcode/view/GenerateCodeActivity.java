@@ -51,6 +51,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class GenerateCodeActivity extends AppCompatActivity {
 
@@ -64,7 +65,9 @@ public class GenerateCodeActivity extends AppCompatActivity {
 
     private String dataSave;
     private String typeCodeSave;
+    private String typeText;
     private boolean codeGenerated = false;
+    private boolean codeSaved = false;
 
     final Calendar calendar = Calendar.getInstance();
 
@@ -242,8 +245,8 @@ public class GenerateCodeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (edtTextGenerateCode.getText().toString().equals(dataSave)) {
                     Toast.makeText(GenerateCodeActivity.this, "Save Success!", Toast.LENGTH_SHORT).show();
-                    DBHelper.getInstance(GenerateCodeActivity.this).addData(dataSave, typeCodeSave, getInstantDateTime(), KEY.TYPE_GENERATE, "Yes", "Like", "");
-                    onBackPressed();
+                    DBHelper.getInstance(GenerateCodeActivity.this).addData(dataSave, typeCodeSave, typeText, getInstantDateTime(), KEY.TYPE_GENERATE, "Yes", "Like", "");
+                    codeSaved = true;
                 } else {
                     Toast.makeText(GenerateCodeActivity.this, "You have change code. Please regenerate and try again!", Toast.LENGTH_SHORT).show();
                 }
@@ -343,10 +346,6 @@ public class GenerateCodeActivity extends AppCompatActivity {
                 Log.d("xxxx", e.getMessage());
             }
 
-            //Action share
-            Intent share = new Intent(Intent.ACTION_SEND);
-            share.setType("images/*");
-
             Uri uri;
             if (Build.VERSION.SDK_INT >= 24) {
                 uri = FileProvider.getUriForFile(
@@ -356,9 +355,12 @@ public class GenerateCodeActivity extends AppCompatActivity {
                 );
             } else {
                 uri = Uri.fromFile(new File(cachePath.getPath()));
-
             }
+            //Action share
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType("image/*");
             share.putExtra(Intent.EXTRA_STREAM, uri);
+            share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             share.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(Intent.createChooser(share, "Share Code"));
         } catch (Exception e) {
@@ -395,6 +397,7 @@ public class GenerateCodeActivity extends AppCompatActivity {
     private void generateCode(BarcodeFormat type) throws WriterException {
         invisibleView();
         dataSave = edtTextGenerateCode.getText().toString();
+        checkTypeText();
         BitMatrix bitMatrix = multiFormatWriter.encode(dataSave, type, 400, 400);
         BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
         Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
@@ -403,6 +406,30 @@ public class GenerateCodeActivity extends AppCompatActivity {
             visibleView();
             codeGenerated = true;
             imgCodeGenerate.setImageBitmap(bitmap);
+        }
+    }
+
+    private void checkTypeText() {
+        if (typeCodeSave.equals("EAN_13") || typeCodeSave.equals("EAN_8")) {
+            typeText = "Good";
+        } else {
+            if (Pattern.matches(KEY.LINK_PATTERN, dataSave)) {
+                typeText = "Link";
+            } else if (Pattern.matches(KEY.PHONE_PATTERN, dataSave)) {
+                typeText = "Phone";
+            } else if (Pattern.matches(KEY.EMAIL_PATTERN, dataSave)) {
+                typeText = "Email";
+            } else if (Pattern.matches(KEY.ADDRESS_PATTERN, dataSave)) {
+                typeText = "Address";
+            } else if (Pattern.matches(KEY.WIFI_PATTERN, dataSave)) {
+                typeText = "Wifi";
+            } else if (Pattern.matches(KEY.CALENDAR_PATTERN, dataSave)) {
+                typeText = "Calender";
+            } else if (Pattern.matches(KEY.SMS_PATTERN, dataSave)) {
+                typeText = "SMS";
+            } else {
+                typeText = "Text";
+            }
         }
     }
 
@@ -424,12 +451,13 @@ public class GenerateCodeActivity extends AppCompatActivity {
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_qs_yes_no);
 
-        TextView txtTitle =dialog.findViewById(R.id.txtTitleToolBar);
-        TextView txtBody =dialog.findViewById(R.id.txtBody);
+        TextView txtTitle = dialog.findViewById(R.id.txtTitleToolBar);
+        TextView txtBody = dialog.findViewById(R.id.txtBody);
         Button btnYes = dialog.findViewById(R.id.btnYes);
         Button btnNo = dialog.findViewById(R.id.btnNo);
 
         btnNo.setText("Back");
+        btnYes.setText("Save");
         txtTitle.setText("Exit");
         txtBody.setText("Exit without save code generated?");
 
@@ -454,9 +482,9 @@ public class GenerateCodeActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if(codeGenerated){
+        if (codeGenerated && !codeSaved) {
             openExitGenerateDialog();
-        }else {
+        } else {
             super.onBackPressed();
         }
     }

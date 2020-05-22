@@ -10,6 +10,7 @@
     <color name="black">#111111</color>
     <color name="white">#FFFFFF</color>
     <color name="status_bar">#B31E1E1E</color>
+    <color name="orange">#FF9913</color>
 
     <color name="viewfinder_mask">#3F51B5</color>
     <color name="viewfinder_laser">#00FFFFFF</color>

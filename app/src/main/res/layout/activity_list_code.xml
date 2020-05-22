@@ -5,11 +5,24 @@
     android:layout_height="match_parent"
     android:background="@color/gray">
 
+    <ImageView
+        android:id="@+id/imgTopBarOffDelete"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_100sdp"
+        android:src="@drawable/shape_topbar_blue"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imgTopBarOnDelete"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:src="@drawable/shape_toolbar_bg"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_100sdp"
-        android:background="@drawable/shape_topbar_blue"
+        android:layout_height="?attr/actionBarSize"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
@@ -42,15 +55,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginTop="?attr/actionBarSize"
         android:layout_marginEnd="@dimen/_8sdp"
         app:cardCornerRadius="@dimen/_6sdp"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/topBar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clTitle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_5sdp">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -65,7 +78,7 @@
 
 
                 <TextView
-                    android:id="@+id/txtTitle"
+                    android:id="@+id/txtCreateAt"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Check Your History"
@@ -87,80 +100,45 @@
 
             <ImageView
                 android:id="@+id/imgTitle"
-                android:layout_width="@dimen/_100sdp"
-                android:layout_height="@dimen/_100sdp"
+                android:layout_width="@dimen/_86sdp"
+                android:layout_height="@dimen/_86sdp"
                 android:layout_marginEnd="@dimen/_10sdp"
-                android:src="@drawable/image_generate"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
-    <!--<androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/topBar"
-        android:paddingEnd="@dimen/_10sdp"
-        android:paddingStart="@dimen/_10sdp"
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvEmpty"
+        app:layout_constraintTop_toBottomOf="@+id/cvTitle"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_5sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_height="@dimen/_280sdp"
+        app:cardCornerRadius="@dimen/_6sdp">
 
-        <ImageView
-            android:id="@+id/imgBack"
-            android:layout_width="@dimen/_25sdp"
-            android:layout_height="@dimen/_25sdp"
-            android:padding="@dimen/_5sdp"
-            android:src="@drawable/ic_back"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/txtTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="History"
-            android:textColor="#000000"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/imgDelete"
-            app:layout_constraintStart_toEndOf="@id/imgBack"
-            app:layout_constraintTop_toTopOf="parent" />
+            <ImageView
+                android:layout_width="@dimen/_120sdp"
+                android:layout_height="@dimen/_120sdp"
+                android:src="@drawable/ic_nothing" />
 
-        <ImageView
-            android:layout_marginEnd="@dimen/_2sdp"
-            android:id="@+id/imgDelete"
-            android:layout_width="@dimen/_25sdp"
-            android:layout_height="@dimen/_25sdp"
-            android:padding="@dimen/_3sdp"
-            android:src="@drawable/ic_delete"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/txtBack"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/imgCheckAll"
-            android:layout_marginEnd="@dimen/_2sdp"
-            android:layout_width="@dimen/_25sdp"
-            android:layout_height="@dimen/_25sdp"
-            android:padding="@dimen/_3sdp"
-            android:src="@drawable/ic_checkboxall"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/imgDelete"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
-        <TextView
-            android:padding="@dimen/_5sdp"
-            android:id="@+id/txtBack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Back"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>-->
+            <TextView
+                android:id="@+id/txtEmpty"
+                android:layout_width="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:text="Your History is empty !!!"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
     <androidx.cardview.widget.CardView
         android:id="@+id/cvSelectAll"
         android:layout_width="match_parent"
@@ -193,12 +171,17 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <ImageView
+        android:id="@+id/blank"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_4sdp"
+        app:layout_constraintTop_toBottomOf="@+id/cvSelectAll" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clTitleItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_8sdp"
-        app:layout_constraintTop_toBottomOf="@+id/cvSelectAll">
+        app:layout_constraintTop_toBottomOf="@+id/blank">
 
         <TextView
             android:id="@+id/txtTitleItem"
@@ -218,7 +201,7 @@
             android:layout_width="@dimen/_25sdp"
             android:layout_height="@dimen/_25sdp"
             android:layout_marginEnd="@dimen/_20sdp"
-            android:padding="@dimen/_5sdp"
+            android:padding="@dimen/_3sdp"
             android:src="@drawable/ic_delete_history"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -232,7 +215,7 @@
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginBottom="@dimen/_5sdp"
-        android:background="@drawable/shape_bg_button"
+        android:background="@drawable/shape_bg_button_blue"
         android:text="DELETE"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent" />
@@ -241,7 +224,6 @@
         android:id="@+id/rcvCodeData"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:padding="@dimen/_2sdp"
         app:layout_constraintBottom_toTopOf="@+id/btnDelete"
         app:layout_constraintTop_toBottomOf="@+id/clTitleItem" />
 

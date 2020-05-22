@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -31,14 +33,16 @@ public class ListCodeActivity extends AppCompatActivity {
     private List<CodeData> dataList = new ArrayList<>();
     private CodeDataAdapter codeDataAdapter;
     private RecyclerView rcvCodeData;
-    private ImageView imgBack, imgDelete,imgTitle;
-    private TextView txtToolBar,txtTitle,txtBody,txtTitleItem;
-    private CardView cvTitle,cvSelectAll;
+    private ImageView imgTopBarOffDelete, imgTopBarOnDelete, imgBack, imgDelete, imgTitle;
+    private TextView txtToolBar, txtTitle, txtBody, txtTitleItem, txtEmpty;
+    private CardView cvTitle, cvSelectAll, cvEmpty;
     private Button btnDelete;
     private ConstraintLayout clTitleItem;
+    private CheckBox checkbox;
 
     private boolean onDelete = false;
     private int positionSave;
+    private int countItemClicked = 0;
     private String title;
 
     @Override
@@ -49,35 +53,34 @@ public class ListCodeActivity extends AppCompatActivity {
 
         dataList.clear();
         Intent intent = getIntent();
-         title = intent.getStringExtra(KEY.TYPE_VIEW);
+        title = intent.getStringExtra(KEY.TYPE_VIEW);
 
         assert title != null;
         switch (title) {
             case KEY.HISTORY:
                 imgTitle.setBackgroundResource(R.drawable.image_history);
-                txtTitle.setText("Check");
-                txtTitle.append("Your History");
+                txtTitle.setText("Check\nYour History");
                 txtBody.setText("Show your History");
                 txtTitleItem.setText("All History");
                 dataList.addAll(DBHelper.getInstance(this).getAllData());
+
                 break;
             case KEY.SAVED:
-                txtTitle.setText("Check");
-                txtTitle.append("Your Saved");
+                txtTitle.setText("Check\nYour Saved");
                 txtBody.setText("Show your Saved");
                 txtTitleItem.setText("All Saved");
                 imgTitle.setBackgroundResource(R.drawable.image_generate);
                 dataList.addAll(DBHelper.getInstance(this).getCodeSaved());
                 break;
-            case KEY.LIKE:
-                txtTitle.setText("Check");
-                txtTitle.append("Your Favorite");
+            case KEY.FAVORITE:
+                txtTitle.setText("Check\nYour Favorite");
                 txtBody.setText("Show your Favorite");
                 txtTitleItem.setText("All Favorite");
                 imgTitle.setBackgroundResource(R.drawable.image_favorite);
                 dataList.addAll(DBHelper.getInstance(this).getAllCodeLike());
                 break;
         }
+        checkEmpty();
 
         Collections.reverse(dataList);
         codeDataAdapter = new CodeDataAdapter(this, dataList);
@@ -88,16 +91,17 @@ public class ListCodeActivity extends AppCompatActivity {
         imgDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    viewOnDelete();
-                    codeDataAdapter.enableCheckBox();
-                    codeDataAdapter.notifyDataSetChanged();
-                    onDelete = true;
+                viewOnDelete();
+                codeDataAdapter.enableCheckBox();
+                codeDataAdapter.notifyDataSetChanged();
+                onDelete = true;
             }
         });
 
         btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                viewOffDelete();
                 for (int i = 0; i < dataList.size(); i++) {
                     if (dataList.get(i).isTicked()) {
                         DBHelper.getInstance(ListCodeActivity.this).deleteOneCodeData(dataList.get(i).getId());
@@ -111,21 +115,38 @@ public class ListCodeActivity extends AppCompatActivity {
                     case KEY.SAVED:
                         dataList.addAll(DBHelper.getInstance(ListCodeActivity.this).getCodeSaved());
                         break;
-                    case KEY.LIKE:
+                    case KEY.FAVORITE:
                         dataList.addAll(DBHelper.getInstance(ListCodeActivity.this).getAllCodeLike());
                         break;
                 }
+                checkEmpty();
                 Collections.reverse(dataList);
                 disableViewCheckBox();
-                onDelete=false;
+                onDelete = false;
             }
         });
 
         cvSelectAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for(int i = 0;i<dataList.size();i++){
-                    dataList.get(i).setTicked(true);
+                if (checkbox.isChecked()) {
+                    checkbox.setChecked(false);
+                    setAllUnChecked();
+                } else {
+                    checkbox.setChecked(true);
+                    setAllChecked();
+                }
+                codeDataAdapter.notifyDataSetChanged();
+            }
+        });
+
+        checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    setAllChecked();
+                } else {
+                    setAllUnChecked();
                 }
                 codeDataAdapter.notifyDataSetChanged();
             }
@@ -139,19 +160,20 @@ public class ListCodeActivity extends AppCompatActivity {
         });
 
         codeDataAdapter.setOnDetailCodeItemClickListener(new CodeDataAdapter.OnDetailCodeItemClickListener() {
-
             @Override
-            public void OnItemClicked(int position, boolean checkBox) {
+            public void OnItemClicked(int position, boolean checkBox, boolean isTicked) {
                 positionSave = position;
                 if (!checkBox) {
                     Intent intentDetails = new Intent(ListCodeActivity.this, DetailCodeActivity.class);
                     intentDetails.putExtra(KEY.CODE_ID, dataList.get(position).getId());
                     startActivityForResult(intentDetails, MainActivity.REQUEST_CODE_DETAIL_CODE);
-                }else {
-                    if(!dataList.get(position).isTicked()){
-                        dataList.get(position).setTicked(true);
-                    }else {
-                        dataList.get(position).setTicked(false);
+                } else {
+                    if (isTicked) {
+                        countItemClicked--;
+                        checkClickAllItem();
+                    } else {
+                        countItemClicked++;
+                        checkClickAllItem();
                     }
                     codeDataAdapter.notifyItemChanged(position);
                 }
@@ -160,10 +182,43 @@ public class ListCodeActivity extends AppCompatActivity {
 
     }
 
+    private void setAllChecked() {
+        countItemClicked = dataList.size();
+        for (int i = 0; i < dataList.size(); i++) {
+            dataList.get(i).setTicked(true);
+        }
+    }
+
+    private void setAllUnChecked() {
+        countItemClicked = 0;
+        for (int i = 0; i < dataList.size(); i++) {
+            dataList.get(i).setTicked(false);
+        }
+    }
+
+    private void checkEmpty() {
+        if (dataList.size() == 0) {
+            cvEmpty.setVisibility(View.VISIBLE);
+            txtEmpty.setText("Your " + title + " is empty!!!");
+        } else {
+            cvEmpty.setVisibility(View.INVISIBLE);
+
+        }
+    }
+
+    private void checkClickAllItem() {
+        Log.e("123123", "checkClickAllItem: " + countItemClicked + dataList.size());
+        if (countItemClicked == dataList.size()) {
+            checkbox.setChecked(true);
+        } else {
+            checkbox.setChecked(false);
+        }
+    }
+
     private void disableViewCheckBox() {
         setDefaultTick();
-        imgBack.setVisibility(View.GONE);
-        cvSelectAll.setVisibility(View.GONE);
+        checkbox.setChecked(false);
+        countItemClicked = 0;
         codeDataAdapter.disableCheckBox();
         codeDataAdapter.notifyDataSetChanged();
         onDelete = false;
@@ -171,16 +226,14 @@ public class ListCodeActivity extends AppCompatActivity {
 
     private void setDefaultTick() {
         for (int i = 0; i < dataList.size(); i++) {
-                dataList.get(i).setTicked(false);
-
-        }
-        for (int i = 0; i < dataList.size(); i++) {
-            Log.e("123123", "setDefaultTick: "+dataList.get(i).isTicked() );
+            dataList.get(i).setTicked(false);
         }
     }
 
     private void viewOnDelete() {
-        txtToolBar.setText("Delete "+title);
+        imgTopBarOnDelete.setVisibility(View.VISIBLE);
+        imgTopBarOffDelete.setVisibility(View.INVISIBLE);
+        txtToolBar.setText("Edit " + title);
         cvTitle.setVisibility(View.GONE);
         clTitleItem.setVisibility(View.GONE);
         cvSelectAll.setVisibility(View.VISIBLE);
@@ -188,6 +241,8 @@ public class ListCodeActivity extends AppCompatActivity {
     }
 
     private void viewOffDelete() {
+        imgTopBarOnDelete.setVisibility(View.INVISIBLE);
+        imgTopBarOffDelete.setVisibility(View.VISIBLE);
         txtToolBar.setText(title);
         cvTitle.setVisibility(View.VISIBLE);
         clTitleItem.setVisibility(View.VISIBLE);
@@ -222,28 +277,35 @@ public class ListCodeActivity extends AppCompatActivity {
 
 
     private void initView() {
+        imgTopBarOffDelete = findViewById(R.id.imgTopBarOffDelete);
+        imgTopBarOnDelete = findViewById(R.id.imgTopBarOnDelete);
         txtToolBar = findViewById(R.id.txtToolBar);
         imgTitle = findViewById(R.id.imgTitle);
         imgDelete = findViewById(R.id.imgDelete);
-        txtTitle = findViewById(R.id.txtTitle);
+        txtTitle = findViewById(R.id.txtCreateAt);
         txtBody = findViewById(R.id.txtBody);
         txtTitleItem = findViewById(R.id.txtTitleItem);
         cvTitle = findViewById(R.id.cvTitle);
+        cvEmpty = findViewById(R.id.cvEmpty);
         clTitleItem = findViewById(R.id.clTitleItem);
         cvSelectAll = findViewById(R.id.cvSelectAll);
+        checkbox = findViewById(R.id.checkbox);
         btnDelete = findViewById(R.id.btnDelete);
         imgBack = findViewById(R.id.imgBack);
         rcvCodeData = findViewById(R.id.rcvCodeData);
         imgBack = findViewById(R.id.imgBack);
         imgDelete = findViewById(R.id.imgDelete);
+        txtEmpty = findViewById(R.id.txtEmpty);
     }
 
     @Override
     public void onBackPressed() {
         if (onDelete) {
+            viewOffDelete();
             disableViewCheckBox();
         } else {
             super.onBackPressed();
         }
     }
+
 }
