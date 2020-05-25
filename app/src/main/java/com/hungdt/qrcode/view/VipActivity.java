@@ -3,6 +3,7 @@ package com.hungdt.qrcode.view;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -12,8 +13,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.anjlab.android.iab.v3.BillingProcessor;
 import com.anjlab.android.iab.v3.TransactionDetails;
+import com.hungdt.qrcode.QRCodeConfigs;
 import com.hungdt.qrcode.R;
 import com.hungdt.qrcode.utils.MySetting;
+import com.unity3d.ads.UnityAds;
 
 public class VipActivity extends AppCompatActivity implements BillingProcessor.IBillingHandler {
     private BillingProcessor billingProcessor;
@@ -95,6 +98,17 @@ public class VipActivity extends AppCompatActivity implements BillingProcessor.I
             btnVip.setText("Start Now (" + billingProcessor.getSubscriptionListingDetails(getString(R.string.ID_SUBSCRIPTION)).priceText + "/Month)");
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (QRCodeConfigs.getInstance().getConfig().getBoolean("config_on")) {
+            if (MainActivity.ggInterstitialAd != null && MainActivity.ggInterstitialAd.isLoaded())
+                MainActivity.ggInterstitialAd.show();
+            else if (UnityAds.isInitialized() && UnityAds.isReady(getString(R.string.INTER_UNI)))
+                UnityAds.show(VipActivity.this, getString(R.string.INTER_UNI));
         }
     }
 }

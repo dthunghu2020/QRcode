@@ -153,7 +153,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:padding="@dimen/_2sdp">
+            android:paddingStart="@dimen/_2sdp"
+            android:paddingEnd="@dimen/_2sdp"
+            android:paddingTop="@dimen/_5sdp"
+            android:paddingBottom="@dimen/_5sdp">
 
             <CheckBox
                 android:id="@+id/checkbox"
@@ -208,6 +211,23 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <LinearLayout
+        android:id="@+id/lnNative"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_2sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/clTitleItem">
+    </LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcvCodeData"
+        android:layout_marginTop="@dimen/_2sdp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnDelete"
+        app:layout_constraintTop_toBottomOf="@+id/lnNative" />
     <Button
         android:id="@+id/btnDelete"
         android:layout_width="match_parent"
@@ -218,14 +238,14 @@
         android:background="@drawable/shape_bg_button_blue"
         android:text="DELETE"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rcvCodeData"
+        app:layout_constraintBottom_toTopOf="@+id/llBanner" />
+    <LinearLayout
+        android:id="@+id/llBanner"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnDelete"
-        app:layout_constraintTop_toBottomOf="@+id/clTitleItem" />
-
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:inputType="textCapWords|text"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

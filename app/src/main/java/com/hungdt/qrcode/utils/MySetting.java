@@ -4,12 +4,25 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class MySetting {
+    public static final String MAX_LENGTH = "maxLength";
     public static final String CONFIG_GG_FB = "dfhhddfhdf";
     public static final String SETTINGS = "ggggdfgdfhfgs";
     public static final String KEY_REMOVE_ADS = "ncvdnrgdcn";
     public static final String KEY_RATE_APP = "yhfghhnrdffndxcx";
     public static final String KEY_SUBSCRIPTION = "nrcvfdbnbre";
 
+
+    public static int getMaxLength(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE);
+        return preferences.getInt(MAX_LENGTH, 3);
+    }
+
+    public static void setMaxLength(Context context, int maxLength) {
+        SharedPreferences preferences = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(MAX_LENGTH, maxLength);
+        editor.apply();
+    }
 
     //Put = set Giá trị
     public static void putConfigGgFb(Context context, long value) {
@@ -29,7 +42,7 @@ public class MySetting {
         SharedPreferences preferences = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(KEY_SUBSCRIPTION, isSub);
-        editor.commit();
+        editor.apply();
     }
 
     public static boolean isSubscription(Context context) {
@@ -52,7 +65,7 @@ public class MySetting {
         SharedPreferences preferences = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(KEY_REMOVE_ADS, removeAds);
-        editor.commit();
+        editor.apply();
     }
 
     public static boolean isRemoveAds(Context context) {

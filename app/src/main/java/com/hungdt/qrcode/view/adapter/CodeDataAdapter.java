@@ -2,11 +2,11 @@ package com.hungdt.qrcode.view.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -25,19 +25,21 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDataHolder> {
 
     private List<CodeData> listData;
     private LayoutInflater layoutInflater;
     private Boolean onCheckBox = false;
+    public int countItemClicked = 0;
 
     private OnDetailCodeItemClickListener onDetailCodeItemClickListener;
+    private SetCheckBoxInterface setCheckBoxInterface;
 
-    public CodeDataAdapter(Context context, List<CodeData> listData) {
+    public CodeDataAdapter(Context context, List<CodeData> listData, SetCheckBoxInterface setCheckBoxInterface) {
         this.listData = listData;
         layoutInflater = LayoutInflater.from(context);
+        this.setCheckBoxInterface = setCheckBoxInterface;
     }
 
     @NonNull
@@ -80,7 +82,7 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
         holder.txtTime.setText(listData.get(position).getCreateTime());
         holder.txtCodeType.setText(listData.get(position).getCodeType());
         holder.txtData.setText(listData.get(position).getData());
-        switch (listData.get(position).getTextType()){
+        switch (listData.get(position).getTextType()) {
             case KEY.GOOD:
                 holder.imgTypeOfText.setImageResource(R.drawable.ic_goods);
                 break;
@@ -145,7 +147,7 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
                         DBHelper.getInstance(layoutInflater.getContext()).setLike(listData.get(position).getId(), "Like");
                     }
                 } else {
-                    setClickITem( listData.get(position), holder);
+                    setClickITem(listData.get(position), holder.checkbox);
                 }
             }
         });
@@ -153,33 +155,39 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
         holder.clItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onDetailCodeItemClickListener.OnItemClicked(holder.getAdapterPosition(), onCheckBox,listData.get(position).isTicked());
+                Log.e("1111", "onClickListener: item");
+                onDetailCodeItemClickListener.OnItemClicked(holder.getAdapterPosition(), onCheckBox);
                 if (onCheckBox) {
-                    setClickITem( listData.get(position), holder);
+                    setClickITem(listData.get(position), holder.checkbox);
                 }
-
             }
         });
-        holder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        holder.checkbox.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    listData.get(position).setTicked(true);
-                }else {
-                    listData.get(position).setTicked(false);
-                }
+            public void onClick(View v) {
+                Log.e("1111", "onClick: checkbox");
+                setClickITem(listData.get(position), holder.checkbox);
             }
         });
     }
 
-    private void setClickITem(CodeData codeData, CodeDataHolder holder) {
+    private void setClickITem(CodeData codeData, CheckBox checkBox) {
         if (codeData.isTicked()) {
+            if (countItemClicked == listData.size()) {
+                setCheckBoxInterface.setUnCheckBox();
+            }
+            countItemClicked--;
             codeData.setTicked(false);
-            holder.checkbox.setChecked(false);
+            checkBox.setChecked(false);
         } else {
+            countItemClicked++;
+            if (countItemClicked == listData.size()) {
+                setCheckBoxInterface.setCheckedBox();
+            }
             codeData.setTicked(true);
-            holder.checkbox.setChecked(true);
+            checkBox.setChecked(true);
         }
+        Log.e("1111", "setClickITem: " + countItemClicked);
     }
 
     private void setViewLike(CodeDataHolder holder) {
@@ -225,7 +233,12 @@ public class CodeDataAdapter extends RecyclerView.Adapter<CodeDataAdapter.CodeDa
     }
 
     public interface OnDetailCodeItemClickListener {
-        void OnItemClicked(int position, boolean checkBox,boolean isTicked);
+        void OnItemClicked(int position, boolean checkBox);
+    }
+
+    public interface SetCheckBoxInterface {
+        void setCheckedBox();
+        void setUnCheckBox();
     }
 
     public void enableCheckBox() {

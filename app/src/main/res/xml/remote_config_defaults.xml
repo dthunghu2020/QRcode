@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>config_version</key>
+        <value>1</value>
+    </entry>
+
+    <entry>
+        <key>config_gg_fb</key>
+        <value>0</value>
+    </entry>
+
+    <entry>
+        <key>config_i_n_i_o</key>
+        <value>false</value>
+    </entry>
+
+    <entry>
+        <key>config_na_cl_s_l</key>
+        <value>false</value>
+    </entry>
+
+    <entry>
+        <key>config_on</key>
+        <value>true</value>
+    </entry>
+</defaultsMap>

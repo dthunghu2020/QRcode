@@ -38,6 +38,7 @@ import com.hungdt.qrcode.R;
 import com.hungdt.qrcode.database.DBHelper;
 import com.hungdt.qrcode.dataset.Constant;
 import com.hungdt.qrcode.model.CodeData;
+import com.hungdt.qrcode.utils.Ads;
 import com.hungdt.qrcode.utils.KEY;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
@@ -67,6 +68,8 @@ public class DetailCodeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail_code);
 
         initView();
+        Ads.initBanner(((LinearLayout) findViewById(R.id.llBanner)), this, true);
+        Ads.initNativeGgFb((LinearLayout) findViewById(R.id.lnNative), this, false);
         multiFormatWriter = new MultiFormatWriter();
         Intent intent = getIntent();
         codeData = DBHelper.getInstance(this).getOneCodeData(intent.getStringExtra(KEY.CODE_ID));

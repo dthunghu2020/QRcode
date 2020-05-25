@@ -13,13 +13,13 @@
         android:background="@drawable/img_vip"
         android:orientation="vertical" />
 
-    <!--<LinearLayout
+    <LinearLayout
         android:id="@+id/lnNative"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/_2sdp"
         android:orientation="vertical">
-    </LinearLayout>-->
+    </LinearLayout>
 
     <!--<androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clDailyReward"

@@ -3,6 +3,7 @@ package com.hungdt.qrcode.view;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -13,7 +14,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -28,11 +31,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.google.ads.consent.ConsentInformation;
+import com.google.ads.consent.ConsentStatus;
+import com.google.ads.mediation.admob.AdMobAdapter;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.reward.RewardItem;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
+import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -41,7 +53,10 @@ import com.google.zxing.common.BitMatrix;
 import com.hungdt.qrcode.R;
 import com.hungdt.qrcode.database.DBHelper;
 import com.hungdt.qrcode.dataset.Constant;
+import com.hungdt.qrcode.utils.Ads;
+import com.hungdt.qrcode.utils.Helper;
 import com.hungdt.qrcode.utils.KEY;
+import com.hungdt.qrcode.utils.MySetting;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 import java.io.File;
@@ -51,9 +66,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Objects;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 public class GenerateCodeActivity extends AppCompatActivity {
+    private RewardedVideoAd videoAds;
 
     private Spinner spinnerCodeType;
     private EditText edtTextGenerateCode;
@@ -68,6 +85,7 @@ public class GenerateCodeActivity extends AppCompatActivity {
     private String typeText;
     private boolean codeGenerated = false;
     private boolean codeSaved = false;
+    private boolean rewardedVideoCompleted = false;
 
     final Calendar calendar = Calendar.getInstance();
 
@@ -77,7 +95,8 @@ public class GenerateCodeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_generate_code);
 
         initView();
-
+        Ads.initBanner(((LinearLayout) findViewById(R.id.llBanner)), this, true);
+        Ads.initNativeGgFb((LinearLayout) findViewById(R.id.lnNative), this, true);
         multiFormatWriter = new MultiFormatWriter();
 
         final ArrayList<String> names = new ArrayList<String>();
@@ -243,12 +262,26 @@ public class GenerateCodeActivity extends AppCompatActivity {
         llSaveCodeGenerate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (edtTextGenerateCode.getText().toString().equals(dataSave)) {
-                    Toast.makeText(GenerateCodeActivity.this, "Save Success!", Toast.LENGTH_SHORT).show();
-                    DBHelper.getInstance(GenerateCodeActivity.this).addData(dataSave, typeCodeSave, typeText, getInstantDateTime(), KEY.TYPE_GENERATE, "Yes", "Like", "");
-                    codeSaved = true;
+                if (DBHelper.getInstance(GenerateCodeActivity.this).getCodeSaved().size() != MySetting.getMaxLength(GenerateCodeActivity.this)) {
+                    if (edtTextGenerateCode.getText().toString().equals(dataSave)) {
+                        Toast.makeText(GenerateCodeActivity.this, "Save Success!", Toast.LENGTH_SHORT).show();
+                        DBHelper.getInstance(GenerateCodeActivity.this).addData(dataSave, typeCodeSave, typeText, getInstantDateTime(), KEY.TYPE_GENERATE, "Yes", "Like", "");
+                        codeSaved = true;
+                    } else {
+                        Toast.makeText(GenerateCodeActivity.this, "You have change code. Please regenerate and try again!", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-                    Toast.makeText(GenerateCodeActivity.this, "You have change code. Please regenerate and try again!", Toast.LENGTH_SHORT).show();
+                    if (Build.VERSION.SDK_INT >= 24) {
+                        openVideoAdsDialog();
+                    } else {
+                        if (edtTextGenerateCode.getText().toString().equals(dataSave)) {
+                            Toast.makeText(GenerateCodeActivity.this, "Save Success!", Toast.LENGTH_SHORT).show();
+                            DBHelper.getInstance(GenerateCodeActivity.this).addData(dataSave, typeCodeSave, typeText, getInstantDateTime(), KEY.TYPE_GENERATE, "Yes", "Like", "");
+                            codeSaved = true;
+                        } else {
+                            Toast.makeText(GenerateCodeActivity.this, "You have change code. Please regenerate and try again!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
                 }
 
             }
@@ -268,6 +301,140 @@ public class GenerateCodeActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    ProgressDialog progressDialog;
+    Dialog morePlaceDialog;
+
+    @SuppressLint("SetTextI18n")
+    private void openVideoAdsDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.video_ads_dialog, null);
+
+        Button btnYes = view.findViewById(R.id.btnYes);
+        Button btnNoThanks = view.findViewById(R.id.btnBack);
+
+        btnYes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (morePlaceDialog != null) morePlaceDialog.dismiss();
+                loadVideoAds();
+            }
+        });
+        btnNoThanks.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (morePlaceDialog != null) morePlaceDialog.dismiss();
+            }
+        });
+        builder.setView(view);
+        builder.setCancelable(false);
+        morePlaceDialog = builder.create();
+        Objects.requireNonNull(morePlaceDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        morePlaceDialog.show();
+    }
+
+    public void loadVideoAds() {
+        if (Helper.isConnectedInternet(this)) {
+            videoAds = MobileAds.getRewardedVideoAdInstance(this);
+            videoAds.setRewardedVideoAdListener(new RewardedVideoAdListener() {
+                @Override
+                public void onRewarded(RewardItem reward) {
+                    MySetting.setMaxLength(GenerateCodeActivity.this, MySetting.getMaxLength(GenerateCodeActivity.this) + 2);
+                    rewardedVideoCompleted = true;
+                }
+
+                @Override
+                public void onRewardedVideoAdLeftApplication() {
+                }
+
+                @Override
+                public void onRewardedVideoAdClosed() {
+
+                }
+
+                @Override
+                public void onRewardedVideoAdFailedToLoad(int errorCode) {
+                    try {
+                        if (progressDialog != null && progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                        Toast.makeText(GenerateCodeActivity.this, "Loading video failed, please try again later", Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onRewardedVideoAdLoaded() {
+                    if (videoAds != null && videoAds.isLoaded()) videoAds.show();
+                    try {
+                        if (progressDialog != null && progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onRewardedVideoAdOpened() {
+                }
+
+                @Override
+                public void onRewardedVideoStarted() {
+                }
+
+                @Override
+                public void onRewardedVideoCompleted() {
+
+                }
+            });
+
+            AdRequest adRequest = null;
+            if (ConsentInformation.getInstance(this).getConsentStatus().toString().equals(ConsentStatus.PERSONALIZED) ||
+                    !ConsentInformation.getInstance(this).isRequestLocationInEeaOrUnknown()) {
+                adRequest = new AdRequest.Builder().build();
+            } else {
+                adRequest = new AdRequest.Builder()
+                        .addNetworkExtrasBundle(AdMobAdapter.class, Ads.getNonPersonalizedAdsBundle())
+                        .build();
+            }
+            videoAds.loadAd(getString(R.string.VIDEO_G), adRequest);
+
+            try {
+                progressDialog = new ProgressDialog(this);
+                //todo ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                progressDialog.setIcon(R.drawable.ic_code);
+                progressDialog.setTitle("More Generate Code");
+                progressDialog.setMessage("Please wait, the Ad is loaded...");
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (videoAds != null && !videoAds.isLoaded()) {
+                            videoAds.destroy(GenerateCodeActivity.this);
+                        }
+                        if (progressDialog != null && progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                            Toast.makeText(GenerateCodeActivity.this, "Loading video failed, please try again later", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, 15000);
+        } else {
+            Toast.makeText(GenerateCodeActivity.this, "Please check your internet connection!!!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void shareDialog() {
@@ -456,8 +623,8 @@ public class GenerateCodeActivity extends AppCompatActivity {
         Button btnYes = dialog.findViewById(R.id.btnYes);
         Button btnNo = dialog.findViewById(R.id.btnNo);
 
-        btnNo.setText("Back");
-        btnYes.setText("Save");
+        btnNo.setText("Save");
+        btnYes.setText("Yes");
         txtTitle.setText("Exit");
         txtBody.setText("Exit without save code generated?");
 
@@ -472,7 +639,11 @@ public class GenerateCodeActivity extends AppCompatActivity {
         btnNo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Toast.makeText(GenerateCodeActivity.this, "Save Success!", Toast.LENGTH_SHORT).show();
+                DBHelper.getInstance(GenerateCodeActivity.this).addData(dataSave, typeCodeSave, typeText, getInstantDateTime(), KEY.TYPE_GENERATE, "Yes", "Like", "");
+                codeSaved = true;
                 dialog.dismiss();
+                finish();
             }
         });
 

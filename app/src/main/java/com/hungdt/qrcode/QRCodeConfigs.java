@@ -1,7 +1,9 @@
 package com.hungdt.qrcode;
 
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+
 public class QRCodeConfigs {
-    /*private static QRCodeConfigs _instance;
+    private static QRCodeConfigs _instance;
     private FirebaseRemoteConfig config;
 
     private QRCodeConfigs() {
@@ -21,5 +23,5 @@ public class QRCodeConfigs {
             _instance = new QRCodeConfigs();
         }
         return _instance;
-    }*/
+    }
 }

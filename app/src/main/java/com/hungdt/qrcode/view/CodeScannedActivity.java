@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.hungdt.qrcode.R;
 import com.hungdt.qrcode.database.DBHelper;
 import com.hungdt.qrcode.dataset.Constant;
+import com.hungdt.qrcode.utils.Ads;
 import com.hungdt.qrcode.utils.KEY;
 
 import java.io.UnsupportedEncodingException;
@@ -47,7 +48,8 @@ public class CodeScannedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_code_scan);
 
         initView();
-
+        Ads.initBanner(((LinearLayout) findViewById(R.id.llBanner)), this, true);
+        Ads.initNativeGgFb((LinearLayout) findViewById(R.id.lnNative), this, false);
         Intent intent = getIntent();
         codeText = intent.getStringExtra(KEY.RESULT_TEXT);
         String typeCode = intent.getStringExtra(KEY.RESULT_TYPE_CODE);

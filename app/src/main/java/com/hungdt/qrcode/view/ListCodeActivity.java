@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.hungdt.qrcode.R;
 import com.hungdt.qrcode.database.DBHelper;
 import com.hungdt.qrcode.model.CodeData;
+import com.hungdt.qrcode.utils.Ads;
 import com.hungdt.qrcode.utils.KEY;
 import com.hungdt.qrcode.view.adapter.CodeDataAdapter;
 
@@ -28,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ListCodeActivity extends AppCompatActivity {
+public class ListCodeActivity extends AppCompatActivity implements CodeDataAdapter.SetCheckBoxInterface {
 
     private List<CodeData> dataList = new ArrayList<>();
     private CodeDataAdapter codeDataAdapter;
@@ -42,15 +44,17 @@ public class ListCodeActivity extends AppCompatActivity {
 
     private boolean onDelete = false;
     private int positionSave;
-    private int countItemClicked = 0;
+
     private String title;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_code);
-        initView();
 
+        initView();
+        Ads.initBanner(((LinearLayout) findViewById(R.id.llBanner)), this, true);
+        Ads.initNativeGgFb((LinearLayout) findViewById(R.id.lnNative), this, true);
         dataList.clear();
         Intent intent = getIntent();
         title = intent.getStringExtra(KEY.TYPE_VIEW);
@@ -83,7 +87,7 @@ public class ListCodeActivity extends AppCompatActivity {
         checkEmpty();
 
         Collections.reverse(dataList);
-        codeDataAdapter = new CodeDataAdapter(this, dataList);
+        codeDataAdapter = new CodeDataAdapter(this, dataList, this);
         rcvCodeData.setLayoutManager(new LinearLayoutManager(this));
         rcvCodeData.setAdapter(codeDataAdapter);
         viewOffDelete();
@@ -140,10 +144,10 @@ public class ListCodeActivity extends AppCompatActivity {
             }
         });
 
-        checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        checkbox.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
+            public void onClick(View v) {
+                if (checkbox.isChecked()) {
                     setAllChecked();
                 } else {
                     setAllUnChecked();
@@ -161,21 +165,12 @@ public class ListCodeActivity extends AppCompatActivity {
 
         codeDataAdapter.setOnDetailCodeItemClickListener(new CodeDataAdapter.OnDetailCodeItemClickListener() {
             @Override
-            public void OnItemClicked(int position, boolean checkBox, boolean isTicked) {
+            public void OnItemClicked(int position, boolean checkBox) {
                 positionSave = position;
                 if (!checkBox) {
                     Intent intentDetails = new Intent(ListCodeActivity.this, DetailCodeActivity.class);
                     intentDetails.putExtra(KEY.CODE_ID, dataList.get(position).getId());
                     startActivityForResult(intentDetails, MainActivity.REQUEST_CODE_DETAIL_CODE);
-                } else {
-                    if (isTicked) {
-                        countItemClicked--;
-                        checkClickAllItem();
-                    } else {
-                        countItemClicked++;
-                        checkClickAllItem();
-                    }
-                    codeDataAdapter.notifyItemChanged(position);
                 }
             }
         });
@@ -183,14 +178,14 @@ public class ListCodeActivity extends AppCompatActivity {
     }
 
     private void setAllChecked() {
-        countItemClicked = dataList.size();
+        codeDataAdapter.countItemClicked = dataList.size();
         for (int i = 0; i < dataList.size(); i++) {
             dataList.get(i).setTicked(true);
         }
     }
 
     private void setAllUnChecked() {
-        countItemClicked = 0;
+        codeDataAdapter.countItemClicked = 0;
         for (int i = 0; i < dataList.size(); i++) {
             dataList.get(i).setTicked(false);
         }
@@ -207,8 +202,8 @@ public class ListCodeActivity extends AppCompatActivity {
     }
 
     private void checkClickAllItem() {
-        Log.e("123123", "checkClickAllItem: " + countItemClicked + dataList.size());
-        if (countItemClicked == dataList.size()) {
+        Log.e("123123", "checkClickAllItem: " + codeDataAdapter.countItemClicked + "/" + dataList.size());
+        if (codeDataAdapter.countItemClicked == dataList.size()) {
             checkbox.setChecked(true);
         } else {
             checkbox.setChecked(false);
@@ -218,7 +213,7 @@ public class ListCodeActivity extends AppCompatActivity {
     private void disableViewCheckBox() {
         setDefaultTick();
         checkbox.setChecked(false);
-        countItemClicked = 0;
+        codeDataAdapter.countItemClicked = 0;
         codeDataAdapter.disableCheckBox();
         codeDataAdapter.notifyDataSetChanged();
         onDelete = false;
@@ -308,4 +303,13 @@ public class ListCodeActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void setCheckedBox() {
+        checkbox.setChecked(true);
+    }
+
+    @Override
+    public void setUnCheckBox() {
+        checkbox.setChecked(false);
+    }
 }

@@ -41,7 +41,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="?attr/actionBarSize"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toTopOf="@+id/llBanner">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -103,6 +103,16 @@
                         app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
+            <LinearLayout
+                android:id="@+id/lnNative"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                app:layout_constraintTop_toBottomOf="@+id/cvTitle"
+                android:orientation="vertical">
+            </LinearLayout>
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
@@ -111,7 +121,7 @@
                 android:layout_marginTop="@dimen/_8sdp"
                 android:layout_marginEnd="@dimen/_8sdp"
                 app:cardCornerRadius="@dimen/_6sdp"
-                app:layout_constraintTop_toBottomOf="@+id/cvTitle">
+                app:layout_constraintTop_toBottomOf="@+id/lnNative">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -252,6 +262,13 @@
             </androidx.cardview.widget.CardView>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
-
+    <LinearLayout
+        android:id="@+id/llBanner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:inputType="textCapWords|text"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

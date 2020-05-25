@@ -80,7 +80,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/llBanner"
         app:layout_constraintTop_toBottomOf="@+id/topBar">
 
         <LinearLayout
@@ -189,6 +189,17 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
+
+            <LinearLayout
+                android:id="@+id/lnNative"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:orientation="vertical"
+                app:layout_constraintTop_toBottomOf="@+id/toolBar">
+            </LinearLayout>
 
             <androidx.cardview.widget.CardView
                 android:layout_marginBottom="@dimen/_5sdp"
@@ -324,5 +335,12 @@
             </androidx.cardview.widget.CardView>
         </LinearLayout>
     </ScrollView>
-
+    <LinearLayout
+        android:id="@+id/llBanner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:inputType="textCapWords|text"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
