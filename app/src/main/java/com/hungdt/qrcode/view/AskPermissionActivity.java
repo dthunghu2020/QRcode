@@ -75,7 +75,6 @@ public class AskPermissionActivity extends AppCompatActivity {
                     //Cái này bật setting trên màn hình app
                     openSettingPermissionDialog();
                 }
-
                 //Cái này sẽ bật tab trên hệ thống.
                     /*Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                             Uri.fromParts("package", getPackageName(), null));

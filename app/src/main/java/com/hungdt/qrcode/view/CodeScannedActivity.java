@@ -18,11 +18,13 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.hungdt.qrcode.QRCodeConfigs;
 import com.hungdt.qrcode.R;
 import com.hungdt.qrcode.database.DBHelper;
 import com.hungdt.qrcode.dataset.Constant;
 import com.hungdt.qrcode.utils.Ads;
 import com.hungdt.qrcode.utils.KEY;
+import com.unity3d.ads.UnityAds;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -33,8 +35,8 @@ import java.util.regex.Pattern;
 public class CodeScannedActivity extends AppCompatActivity {
 
     private ImageView imgBack, imgResultImage;
-    private TextView txtResultCode, txtTitleToolBar, txtTitle, txtCreateAt, txtTime, txtCodeType, txtTextType;
-    private LinearLayout llCopyText, llShare, llSearch;
+    private TextView txtResultCode, txtTitleToolBar, txtTitle, txtCreateAt, txtTime, txtCodeType, txtTextType,txtContentCode;
+    private LinearLayout llCopyText, llShare, llSearch,llOption;
     private Button btnNewScan;
 
     private String codeText;
@@ -55,26 +57,32 @@ public class CodeScannedActivity extends AppCompatActivity {
         String typeCode = intent.getStringExtra(KEY.RESULT_TYPE_CODE);
         String typeCreate = intent.getStringExtra(KEY.TYPE);
         String typeText;
-        assert typeCode != null;
-        if (typeCode.equals("EAN_13") || typeCode.equals("EAN_8")) {
-            typeText = "Good";
+        if (typeCode == null) {
+            typeText = null;
+            txtContentCode.setVisibility(View.GONE);
+            txtResultCode.setVisibility(View.GONE);
+            llOption.setVisibility(View.GONE);
         } else {
-            if (Pattern.matches(KEY.LINK_PATTERN, codeText)) {
-                typeText = "Link";
-            } else if (Pattern.matches(KEY.PHONE_PATTERN, codeText)) {
-                typeText = "Phone";
-            } else if (Pattern.matches(KEY.EMAIL_PATTERN, codeText)) {
-                typeText = "Email";
-            } else if (Pattern.matches(KEY.ADDRESS_PATTERN, codeText)) {
-                typeText = "Address";
-            } else if (Pattern.matches(KEY.WIFI_PATTERN, codeText)) {
-                typeText = "Wifi";
-            } else if (Pattern.matches(KEY.CALENDAR_PATTERN, codeText)) {
-                typeText = "Calender";
-            } else if (Pattern.matches(KEY.SMS_PATTERN, codeText)) {
-                typeText = "SMS";
+            if (typeCode.equals("EAN_13") || typeCode.equals("EAN_8")||typeCode.equals("CODE_39")||typeCode.equals("CODE_93")||typeCode.equals("CODE_128")||typeCode.equals("UPC_A")||typeCode.equals("UPC_E")||typeCode.equals("UPC_EAN_EXTENSION")||typeCode.equals("ITF")) {
+                typeText = "Good";
             } else {
-                typeText = "Text";
+                if (Pattern.matches(KEY.LINK_PATTERN, codeText)) {
+                    typeText = "Link";
+                } else if (Pattern.matches(KEY.PHONE_PATTERN, codeText)) {
+                    typeText = "Phone";
+                } else if (Pattern.matches(KEY.EMAIL_PATTERN, codeText)) {
+                    typeText = "Email";
+                } else if (Pattern.matches(KEY.ADDRESS_PATTERN, codeText)) {
+                    typeText = "Address";
+                } else if (Pattern.matches(KEY.WIFI_PATTERN, codeText)) {
+                    typeText = "Wifi";
+                } else if (Pattern.matches(KEY.CALENDAR_PATTERN, codeText)) {
+                    typeText = "Calender";
+                } else if (Pattern.matches(KEY.SMS_PATTERN, codeText)) {
+                    typeText = "SMS";
+                } else {
+                    typeText = "Text";
+                }
             }
         }
 
@@ -101,7 +109,7 @@ public class CodeScannedActivity extends AppCompatActivity {
         txtCreateAt.setText("From: " + typeCreate);
         txtTime.setText("Time: " + getInstantDateTime());
         txtCodeType.setText("Code: " + typeCode);
-        txtTextType.setText("Type: "+typeText);
+        txtTextType.setText("Type: " + typeText);
 
         imgResultImage.setImageBitmap(MainActivity.BITMAP);
 
@@ -176,9 +184,11 @@ public class CodeScannedActivity extends AppCompatActivity {
         txtTime = findViewById(R.id.txtTime);
         txtTextType = findViewById(R.id.txtTextType);
         txtCodeType = findViewById(R.id.txtCodeType);
+        txtContentCode = findViewById(R.id.txtContentCode);
         txtTitle = findViewById(R.id.txtTitle);
         txtTitleToolBar = findViewById(R.id.txtTitleToolBar);
         btnNewScan = findViewById(R.id.btnNewScan);
+        llOption = findViewById(R.id.llOption);
         llCopyText = findViewById(R.id.llCopyText);
         llShare = findViewById(R.id.llShare);
         llSearch = findViewById(R.id.llSearch);
@@ -187,5 +197,16 @@ public class CodeScannedActivity extends AppCompatActivity {
     private String getInstantDateTime() {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat(Constant.getDateTimeFormat());
         return sdf.format(calendar.getTime());
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        /*if (QRCodeConfigs.getInstance().getConfig().getBoolean("config_on")) {
+            if (MainActivity.ggInterstitialAd != null && MainActivity.ggInterstitialAd.isLoaded())
+                MainActivity.ggInterstitialAd.show();
+            else if (UnityAds.isInitialized() && UnityAds.isReady(getString(R.string.INTER_UNI)))
+                UnityAds.show(CodeScannedActivity.this, getString(R.string.INTER_UNI));
+        }*/
     }
 }

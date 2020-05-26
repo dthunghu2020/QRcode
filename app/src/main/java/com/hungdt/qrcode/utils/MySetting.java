@@ -5,12 +5,25 @@ import android.content.SharedPreferences;
 
 public class MySetting {
     public static final String MAX_LENGTH = "maxLength";
+    public static final String COUNT = "count";
     public static final String CONFIG_GG_FB = "dfhhddfhdf";
     public static final String SETTINGS = "ggggdfgdfhfgs";
     public static final String KEY_REMOVE_ADS = "ncvdnrgdcn";
     public static final String KEY_RATE_APP = "yhfghhnrdffndxcx";
     public static final String KEY_SUBSCRIPTION = "nrcvfdbnbre";
 
+
+    public static int getCount(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE);
+        return preferences.getInt(COUNT, 0);
+    }
+
+    public static void setCount(Context context, int count) {
+        SharedPreferences preferences = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(COUNT, count);
+        editor.apply();
+    }
 
     public static int getMaxLength(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE);

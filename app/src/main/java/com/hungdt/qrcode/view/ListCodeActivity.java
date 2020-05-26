@@ -19,12 +19,14 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.hungdt.qrcode.QRCodeConfigs;
 import com.hungdt.qrcode.R;
 import com.hungdt.qrcode.database.DBHelper;
 import com.hungdt.qrcode.model.CodeData;
 import com.hungdt.qrcode.utils.Ads;
 import com.hungdt.qrcode.utils.KEY;
 import com.hungdt.qrcode.view.adapter.CodeDataAdapter;
+import com.unity3d.ads.UnityAds;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +55,7 @@ public class ListCodeActivity extends AppCompatActivity implements CodeDataAdapt
         setContentView(R.layout.activity_list_code);
 
         initView();
-        Ads.initBanner(((LinearLayout) findViewById(R.id.llBanner)), this, true);
+        //Ads.initBanner(((LinearLayout) findViewById(R.id.llBanner)), this, true);
         Ads.initNativeGgFb((LinearLayout) findViewById(R.id.lnNative), this, true);
         dataList.clear();
         Intent intent = getIntent();
@@ -265,7 +267,6 @@ public class ListCodeActivity extends AppCompatActivity implements CodeDataAdapt
                     dataList.set(positionSave, codeData);
                     codeDataAdapter.notifyItemChanged(positionSave);
                 }
-
             }
         }
     }
@@ -300,6 +301,12 @@ public class ListCodeActivity extends AppCompatActivity implements CodeDataAdapt
             disableViewCheckBox();
         } else {
             super.onBackPressed();
+            if (QRCodeConfigs.getInstance().getConfig().getBoolean("config_on")) {
+                if (MainActivity.ggInterstitialAd != null && MainActivity.ggInterstitialAd.isLoaded())
+                    MainActivity.ggInterstitialAd.show();
+                else if (UnityAds.isInitialized() && UnityAds.isReady(getString(R.string.INTER_UNI)))
+                    UnityAds.show(ListCodeActivity.this, getString(R.string.INTER_UNI));
+            }
         }
     }
 

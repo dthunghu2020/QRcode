@@ -2,6 +2,7 @@ package com.hungdt.qrcode.view;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -37,6 +38,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.anjlab.android.iab.v3.BillingProcessor;
+import com.anjlab.android.iab.v3.TransactionDetails;
 import com.google.ads.consent.ConsentInformation;
 import com.google.ads.consent.ConsentStatus;
 import com.google.ads.mediation.admob.AdMobAdapter;
@@ -50,6 +53,7 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
+import com.hungdt.qrcode.QRCodeConfigs;
 import com.hungdt.qrcode.R;
 import com.hungdt.qrcode.database.DBHelper;
 import com.hungdt.qrcode.dataset.Constant;
@@ -58,6 +62,7 @@ import com.hungdt.qrcode.utils.Helper;
 import com.hungdt.qrcode.utils.KEY;
 import com.hungdt.qrcode.utils.MySetting;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
+import com.unity3d.ads.UnityAds;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -69,8 +74,9 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.regex.Pattern;
 
-public class GenerateCodeActivity extends AppCompatActivity {
+public class GenerateCodeActivity extends AppCompatActivity implements BillingProcessor.IBillingHandler {
     private RewardedVideoAd videoAds;
+    private BillingProcessor bp;
 
     private Spinner spinnerCodeType;
     private EditText edtTextGenerateCode;
@@ -85,7 +91,7 @@ public class GenerateCodeActivity extends AppCompatActivity {
     private String typeText;
     private boolean codeGenerated = false;
     private boolean codeSaved = false;
-    private boolean rewardedVideoCompleted = false;
+    private boolean readyToPurchase = false;
 
     final Calendar calendar = Calendar.getInstance();
 
@@ -98,6 +104,9 @@ public class GenerateCodeActivity extends AppCompatActivity {
         Ads.initBanner(((LinearLayout) findViewById(R.id.llBanner)), this, true);
         Ads.initNativeGgFb((LinearLayout) findViewById(R.id.lnNative), this, true);
         multiFormatWriter = new MultiFormatWriter();
+
+        bp = BillingProcessor.newBillingProcessor(this, getString(R.string.BASE64), this); // doesn't bind
+        bp.initialize();
 
         final ArrayList<String> names = new ArrayList<String>();
         names.add("QR_CODE");
@@ -262,8 +271,13 @@ public class GenerateCodeActivity extends AppCompatActivity {
         llSaveCodeGenerate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (DBHelper.getInstance(GenerateCodeActivity.this).getCodeSaved().size() != MySetting.getMaxLength(GenerateCodeActivity.this)) {
+                if(MySetting.isSubscription(GenerateCodeActivity.this)){
+                    Toast.makeText(GenerateCodeActivity.this, "Save Success!", Toast.LENGTH_SHORT).show();
+                    DBHelper.getInstance(GenerateCodeActivity.this).addData(dataSave, typeCodeSave, typeText, getInstantDateTime(), KEY.TYPE_GENERATE, "Yes", "Like", "");
+                    codeSaved = true;
+                }else if (MySetting.getCount(GenerateCodeActivity.this) != MySetting.getMaxLength(GenerateCodeActivity.this)) {
                     if (edtTextGenerateCode.getText().toString().equals(dataSave)) {
+                        MySetting.setCount(GenerateCodeActivity.this, MySetting.getCount(GenerateCodeActivity.this) + 1);
                         Toast.makeText(GenerateCodeActivity.this, "Save Success!", Toast.LENGTH_SHORT).show();
                         DBHelper.getInstance(GenerateCodeActivity.this).addData(dataSave, typeCodeSave, typeText, getInstantDateTime(), KEY.TYPE_GENERATE, "Yes", "Like", "");
                         codeSaved = true;
@@ -283,7 +297,13 @@ public class GenerateCodeActivity extends AppCompatActivity {
                         }
                     }
                 }
-
+                llSaveCodeGenerate.setEnabled(false);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        llSaveCodeGenerate.setEnabled(true);
+                    }
+                },1250);
             }
         });
 
@@ -313,20 +333,31 @@ public class GenerateCodeActivity extends AppCompatActivity {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.video_ads_dialog, null);
 
-        Button btnYes = view.findViewById(R.id.btnYes);
-        Button btnNoThanks = view.findViewById(R.id.btnBack);
+        Button btnActiveVip = view.findViewById(R.id.btnActiveVip);
+        Button btnWhatVideo = view.findViewById(R.id.btnWhatVideo);
+        ImageView imgX = view.findViewById(R.id.imgX);
 
-        btnYes.setOnClickListener(new View.OnClickListener() {
+        btnWhatVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (morePlaceDialog != null) morePlaceDialog.dismiss();
                 loadVideoAds();
             }
         });
-        btnNoThanks.setOnClickListener(new View.OnClickListener() {
+        imgX.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (morePlaceDialog != null) morePlaceDialog.dismiss();
+            }
+        });
+        btnActiveVip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (readyToPurchase) {
+                    bp.subscribe(GenerateCodeActivity.this, getString(R.string.ID_SUBSCRIPTION));
+                } else {
+                    Toast.makeText(getApplicationContext(), "Unable to initiate purchase", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         builder.setView(view);
@@ -343,7 +374,6 @@ public class GenerateCodeActivity extends AppCompatActivity {
                 @Override
                 public void onRewarded(RewardItem reward) {
                     MySetting.setMaxLength(GenerateCodeActivity.this, MySetting.getMaxLength(GenerateCodeActivity.this) + 2);
-                    rewardedVideoCompleted = true;
                 }
 
                 @Override
@@ -632,6 +662,8 @@ public class GenerateCodeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+                sendResult();
+                interAds();
                 finish();
             }
         });
@@ -643,6 +675,8 @@ public class GenerateCodeActivity extends AppCompatActivity {
                 DBHelper.getInstance(GenerateCodeActivity.this).addData(dataSave, typeCodeSave, typeText, getInstantDateTime(), KEY.TYPE_GENERATE, "Yes", "Like", "");
                 codeSaved = true;
                 dialog.dismiss();
+                sendResult();
+                interAds();
                 finish();
             }
         });
@@ -657,6 +691,62 @@ public class GenerateCodeActivity extends AppCompatActivity {
             openExitGenerateDialog();
         } else {
             super.onBackPressed();
+            sendResult();
+            interAds();
+        }
+    }
+
+    private void interAds() {
+        if (QRCodeConfigs.getInstance().getConfig().getBoolean("config_on")) {
+            if (MainActivity.ggInterstitialAd != null && MainActivity.ggInterstitialAd.isLoaded())
+                MainActivity.ggInterstitialAd.show();
+            else if (UnityAds.isInitialized() && UnityAds.isReady(getString(R.string.INTER_UNI)))
+                UnityAds.show(GenerateCodeActivity.this, getString(R.string.INTER_UNI));
+        }
+    }
+
+    private void sendResult() {
+        Intent returnIntent = new Intent();
+        setResult(Activity.RESULT_CANCELED, returnIntent);
+        finish();
+    }
+
+    @Override
+    public void onProductPurchased(String productId, TransactionDetails details) {
+        try {
+            Toast.makeText(this, "Thanks for your Purchased!", Toast.LENGTH_SHORT).show();
+            MySetting.setSubscription(this, true);
+            MySetting.putRemoveAds(this, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onPurchaseHistoryRestored() {
+
+    }
+
+    @Override
+    public void onBillingError(int errorCode, Throwable error) {
+        Toast.makeText(this, "Unable to process billing", Toast.LENGTH_SHORT).show();
+    }
+
+    @SuppressLint("SetTextI18n")
+    @Override
+    public void onBillingInitialized() {
+        readyToPurchase = true;
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (bp != null) {
+            bp.release();
+        }
+    }
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (!bp.handleActivityResult(requestCode, resultCode, data)) {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 }

@@ -256,15 +256,6 @@ public class DetailCodeActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private boolean checkPermission(String permission) {
-        int result = ContextCompat.checkSelfPermission(DetailCodeActivity.this, permission);
-        if (result == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     private void generateCode(BarcodeFormat type) throws WriterException {
 
         BitMatrix bitMatrix = multiFormatWriter.encode(codeData.getData(), type, 400, 400);

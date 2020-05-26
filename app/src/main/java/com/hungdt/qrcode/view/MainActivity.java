@@ -19,6 +19,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -79,7 +80,6 @@ import com.unity3d.ads.UnityAds;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -87,8 +87,9 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
 
     public static Bitmap BITMAP;
     private static final int GALLERY_REQUEST_CODE = 203;
-    public static final int FILE_SHARE_PERMISSION = 102;
+    public static final int FILE_SHARE_PERMISSION = 202;
     public static final int REQUEST_CODE_DETAIL_CODE = 200;
+    public static final int REQUEST_CODE_GENERATE = 204;
 
     public static InterstitialAd ggInterstitialAd;
     public static com.facebook.ads.InterstitialAd fbInterstitialAd;
@@ -99,14 +100,13 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
     private boolean readyToPurchase = false;
     private boolean openVipActivity = false;
     private boolean rewardedVideoCompleted = false;
-    private int gemReward = 0;
+    private boolean isDailyReward = false;
 
     private TextView txtFlash;
     private ImageView imgMenu, imgRemoveAds, imgGift, imgGiftGenerate;
     private CircleImageView imgFlashOn, imgFlashOff;
-    private LinearLayout llGenerateCode, llSaved, llLike, llHistory, llScanImage, llFlash, llBanner;
+    private LinearLayout llGenerateCode, llSaved, llLike, llHistory, llScanImage, llFlash;
     private DrawerLayout drawerLayout;
-    private NavigationView navigationView;
 
     private DecoratedBarcodeView scanner_view;
 
@@ -134,6 +134,10 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
         }
 
         final Animation animationRotate = AnimationUtils.loadAnimation(this, R.anim.anim_rotate);
+        if(MySetting.isSubscription(MainActivity.this)){
+            imgGift.setImageResource(R.drawable.ic_vip);
+            imgGift.setClickable(false);
+        }
         imgGift.startAnimation(animationRotate);
         imgFlashOn.setVisibility(View.INVISIBLE);
 
@@ -156,7 +160,6 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
 
             }
         });
-
 
         imgMenu.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("RtlHardcoded")
@@ -247,21 +250,31 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
             }
         });
 
+        if (DBHelper.getInstance(MainActivity.this).getCodeSaved().size() > MySetting.getCount(MainActivity.this)){
+            MySetting.setCount(MainActivity.this, DBHelper.getInstance(MainActivity.this).getCodeSaved().size());
+        }
+
+        checkMaxLength();
         llGenerateCode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (DBHelper.getInstance(MainActivity.this).getCodeSaved().size() == MySetting.getMaxLength(MainActivity.this)) {
-                    if (Build.VERSION.SDK_INT >= 24) {
-                        openVideoAdsDialog();
+                isDailyReward = false;
+                if (MySetting.isSubscription(MainActivity.this)) {
+                    openGenerateCodeActivity();
+                } else {
+                    if (MySetting.getCount(MainActivity.this) == MySetting.getMaxLength(MainActivity.this)) {
+                        if (Build.VERSION.SDK_INT >= 24) {
+                            openVideoAdsDialog();
+                        } else {
+                            openGenerateCodeActivity();
+                        }
                     } else {
                         openGenerateCodeActivity();
                     }
-                } else {
-                    openGenerateCodeActivity();
                 }
+
             }
         });
-
         llSaved.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -304,38 +317,40 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
         imgGift.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Daily Reward", Toast.LENGTH_SHORT).show();
-                //loadVideoAds();
+                isDailyReward = true;
+                openVideoAdsDialog();
             }
         });
-        checkMaxLength();
-
-        if (Build.VERSION.SDK_INT >= 23) {
-            checkPermission();
-        }
 
         if (!openVipActivity && Helper.isConnectedInternet(this)) {
             Intent intent = new Intent(this, VipActivity.class);
             startActivity(intent);
             openVipActivity = true;
         }
-
+        if (Build.VERSION.SDK_INT >= 23) {
+            checkPermission();
+        }
     }
 
     private void checkMaxLength() {
-        if (DBHelper.getInstance(this).getCodeSaved().size() < MySetting.getMaxLength(this)) {
+        if(MySetting.isSubscription(this)){
             imgGiftGenerate.setVisibility(View.INVISIBLE);
-        } else if (DBHelper.getInstance(this).getCodeSaved().size() == MySetting.getMaxLength(this)) {
-            imgGiftGenerate.setVisibility(View.VISIBLE);
-        } else {
-            MySetting.setMaxLength(this, DBHelper.getInstance(this).getCodeSaved().size());
-            imgGiftGenerate.setVisibility(View.VISIBLE);
+        }else {
+            if (MySetting.getCount(this) < MySetting.getMaxLength(this)||Build.VERSION.SDK_INT < 24) {
+                imgGiftGenerate.setVisibility(View.INVISIBLE);
+            } else if (MySetting.getCount(this) == MySetting.getMaxLength(this)) {
+                imgGiftGenerate.setVisibility(View.VISIBLE);
+            } else {
+                MySetting.setMaxLength(this, DBHelper.getInstance(this).getCodeSaved().size());
+                imgGiftGenerate.setVisibility(View.VISIBLE);
+            }
         }
+
     }
 
     private void openGenerateCodeActivity() {
         Intent intent = new Intent(MainActivity.this, GenerateCodeActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_CODE_GENERATE);
     }
 
     ProgressDialog progressDialog;
@@ -345,13 +360,21 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
     private void openVideoAdsDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.video_ads_dialog, null);
+        final LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        assert inflater != null;
+        @SuppressLint("InflateParams") final View view = inflater.inflate(R.layout.video_ads_dialog, null);
 
-        Button btnYes = view.findViewById(R.id.btnYes);
-        Button btnNoThanks = view.findViewById(R.id.btnBack);
+        TextView txtTitle = view.findViewById(R.id.txtTitle);
+        Button btnActiveVip = view.findViewById(R.id.btnActiveVip);
+        Button btnWhatVideo = view.findViewById(R.id.btnWhatVideo);
+        ImageView imgX = view.findViewById(R.id.imgX);
+        LinearLayout llVIP = view.findViewById(R.id.llVIP);
+        if (isDailyReward) {
+            txtTitle.setText("Daily Reward!");
+            llVIP.setVisibility(View.GONE);
+        }
 
-        btnYes.setOnClickListener(new View.OnClickListener() {
+        btnWhatVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (morePlaceDialog != null) morePlaceDialog.dismiss();
@@ -359,12 +382,25 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
                 loadVideoAds();
             }
         });
-        btnNoThanks.setOnClickListener(new View.OnClickListener() {
+
+        imgX.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (morePlaceDialog != null) morePlaceDialog.dismiss();
             }
         });
+
+        btnActiveVip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (readyToPurchase) {
+                    bp.subscribe(MainActivity.this, getString(R.string.ID_SUBSCRIPTION));
+                } else {
+                    Toast.makeText(getApplicationContext(), "Unable to initiate purchase", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         builder.setView(view);
         builder.setCancelable(false);
         morePlaceDialog = builder.create();
@@ -389,7 +425,11 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
                 @Override
                 public void onRewardedVideoAdClosed() {
                     if (rewardedVideoCompleted) {
-                        openGenerateCodeActivity();
+                        if (isDailyReward) {
+                            openRewardSuccessDialog();
+                        } else {
+                            openGenerateCodeActivity();
+                        }
                     }
                 }
 
@@ -472,34 +512,6 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
         } else {
             Toast.makeText(MainActivity.this, "Please check your internet connection!!!", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void openGemRewardedDialog() {
-        final Dialog gemRewardedDialog = new Dialog(MainActivity.this);
-        gemRewardedDialog.setContentView(R.layout.reward_success_dialog);
-
-        TextView txtGemRewarded = gemRewardedDialog.findViewById(R.id.txtGemRewarded);
-        Button btnOk = gemRewardedDialog.findViewById(R.id.btnOk);
-        ImageView imgBack = gemRewardedDialog.findViewById(R.id.imgBack);
-
-        txtGemRewarded.setText("x " + gemReward);
-
-        imgBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gemRewardedDialog.dismiss();
-            }
-        });
-
-        btnOk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gemRewardedDialog.dismiss();
-            }
-        });
-        Objects.requireNonNull(gemRewardedDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        gemRewardedDialog.show();
     }
 
     private void initInterstitialAd() {
@@ -693,10 +705,8 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
         }
     }
 
-
     private void initView() {
         drawerLayout = findViewById(R.id.draw_layout);
-        navigationView = findViewById(R.id.nav_view);
         scanner_view = findViewById(R.id.scanner_view);
         imgMenu = findViewById(R.id.imgMenu);
         imgRemoveAds = findViewById(R.id.imgRemoveAds);
@@ -711,7 +721,6 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
         llSaved = findViewById(R.id.llSaved);
         llLike = findViewById(R.id.llLike);
         llHistory = findViewById(R.id.llHistory);
-        llBanner = findViewById(R.id.llBanner);
     }
 
     private void openCodeScannedView(BarcodeResult result) {
@@ -726,9 +735,7 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
             MainActivity.ggInterstitialAd.show();
         else if (UnityAds.isInitialized() && UnityAds.isReady(getString(R.string.INTER_UNI)))
             UnityAds.show(this, getString(R.string.INTER_UNI));
-
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -755,6 +762,12 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
                 }
             }
         }
+        if (requestCode == REQUEST_CODE_GENERATE) {
+            if (resultCode == Activity.RESULT_CANCELED) {
+                Log.e("1111", "onActivityResult: ");
+                checkMaxLength();
+            }
+        }
     }
 
     private void scanQRImage(Bitmap bMap) {
@@ -772,7 +785,6 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
             Result result = reader.decode(bitmap);
             data = result.getText();
             typeCode = result.getBarcodeFormat().toString();
-            Log.e("123123", "scanQRImage: \n" + data);
         } catch (Exception e) {
             //Log.e("QrTest", "Error decoding barcode", e);
         }
@@ -789,6 +801,46 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
             UnityAds.show(this, getString(R.string.INTER_UNI));
     }
 
+    private void openRewardSuccessDialog() {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.reward_success_dialog);
+
+        dialog.findViewById(R.id.btnOk).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void openExitAppDialog() {
+        final BottomSheetDialog exitDialog = new BottomSheetDialog(this);
+        exitDialog.setContentView(R.layout.exit_app_dialog);
+
+        if (QRCodeConfigs.getInstance().getConfig().getBoolean("config_on")) {
+            Ads.initNativeGgFb((LinearLayout) exitDialog.findViewById(R.id.lnNative), this, false);
+        }
+
+        Button btnYes = exitDialog.findViewById(R.id.btnYes);
+        Button btnCancel = exitDialog.findViewById(R.id.btnCancel);
+
+        btnYes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                exitDialog.dismiss();
+                finish();
+            }
+        });
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                exitDialog.dismiss();
+            }
+        });
+        exitDialog.show();
+    }
 
     @Override
     protected void onResume() {
@@ -810,7 +862,13 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
     @Override
     public void onProductPurchased(String productId, TransactionDetails details) {
         Toast.makeText(this, "Thank you for your purchased!", Toast.LENGTH_SHORT).show();
-        checkRemoveAds();
+        if(productId==getString(R.string.ID_REMOVE_ADS)){
+            checkRemoveAds();
+        }else if(productId==getString(R.string.ID_SUBSCRIPTION)){
+            MySetting.setSubscription(this, true);
+            MySetting.putRemoveAds(this, true);
+        }
+        Toast.makeText(this, "Thanks for your Purchased!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -851,33 +909,6 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
                 openExitAppDialog();
             }
         }, 300);
-    }
-
-    private void openExitAppDialog() {
-        final BottomSheetDialog exitDialog = new BottomSheetDialog(this);
-        exitDialog.setContentView(R.layout.exit_app_dialog);
-
-        if (QRCodeConfigs.getInstance().getConfig().getBoolean("config_on")) {
-            Ads.initNativeGgFb((LinearLayout) exitDialog.findViewById(R.id.lnNative), this, false);
-        }
-
-        Button btnYes = exitDialog.findViewById(R.id.btnYes);
-        Button btnCancel = exitDialog.findViewById(R.id.btnCancel);
-
-        btnYes.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                exitDialog.dismiss();
-                finish();
-            }
-        });
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                exitDialog.dismiss();
-            }
-        });
-        exitDialog.show();
     }
 
 }

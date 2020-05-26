@@ -9,8 +9,8 @@
     <ImageView
         android:layout_marginTop="@dimen/_25sdp"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_160sdp"
-        android:background="@drawable/img_vip"
+        android:layout_height="@dimen/_142sdp"
+        android:src="@drawable/img_vip"
         android:orientation="vertical" />
 
     <LinearLayout
