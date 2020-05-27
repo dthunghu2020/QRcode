@@ -1,13 +1,11 @@
 package com.hungdt.qrcode.view;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -26,7 +24,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -36,7 +33,6 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.hungdt.qrcode.R;
 import com.hungdt.qrcode.database.DBHelper;
-import com.hungdt.qrcode.dataset.Constant;
 import com.hungdt.qrcode.model.CodeData;
 import com.hungdt.qrcode.utils.Ads;
 import com.hungdt.qrcode.utils.KEY;
@@ -47,15 +43,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Objects;
 
 public class DetailCodeActivity extends AppCompatActivity {
 
     private ImageView imgBack,imgLike,imgLove,imgDelete,imgDetailImage;
     private FrameLayout flLike;
-    private TextView txtDetailCode,txtCreateAt,txtTime,txtCodeType,txtTextType;
+    private TextView txtDetailCode,txtCreateAt,txtTime,txtCodeType,txtTextType, txtNotSupport;
     private LinearLayout llCopyText,llSearch,llShare;
     private CodeData codeData;
     private boolean like = true;
@@ -68,6 +62,7 @@ public class DetailCodeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail_code);
 
         initView();
+        txtNotSupport.setVisibility(View.GONE);
         Ads.initBanner(((LinearLayout) findViewById(R.id.llBanner)), this, true);
         Ads.initNativeGgFb((LinearLayout) findViewById(R.id.lnNative), this, false);
         multiFormatWriter = new MultiFormatWriter();
@@ -82,71 +77,62 @@ public class DetailCodeActivity extends AppCompatActivity {
             switch (codeData.getCodeType()) {
                 case "QR_CODE":
                     txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.QR_CODE);
+                    generateCode(BarcodeFormat.QR_CODE,true);
                     break;
                 case "CODE_128":
                     txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.CODE_128);
+                    generateCode(BarcodeFormat.CODE_128,false);
                     break;
                 case "CODE_93":
                     txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.CODE_93);
+                    generateCode(BarcodeFormat.CODE_93,false);
                     break;
                 case "CODE_39":
                     txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.CODE_39);
+                    generateCode(BarcodeFormat.CODE_39,false);
                     break;
                 case "EAN_13":
                     txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.EAN_13);
+                    generateCode(BarcodeFormat.EAN_13,false);
                     break;
                 case "EAN_8":
                     txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.EAN_8);
+                    generateCode(BarcodeFormat.EAN_8,false);
                     break;
                 case "UPC_A":
                     txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.UPC_A);
+                    generateCode(BarcodeFormat.UPC_A,false);
                     break;
                 case "UPC_E":
                     txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.UPC_E);
-                    break;
-                case "UPC_EAN_EXTENSION":
-                    txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.UPC_EAN_EXTENSION);
+                    generateCode(BarcodeFormat.UPC_E,false);
                     break;
                 case "ITF":
                     txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.ITF);
+                    generateCode(BarcodeFormat.ITF,false);
                     break;
                 case "PDF_417":
                     txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.PDF_417);
+                    generateCode(BarcodeFormat.PDF_417,false);
                     break;
                 case "CODABAR":
                     txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.CODABAR);
+                    generateCode(BarcodeFormat.CODABAR,false);
                     break;
                 case "DATA_MATRIX":
                     txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.DATA_MATRIX);
+                    generateCode(BarcodeFormat.DATA_MATRIX,true);
                     break;
                 case "AZTEC":
                     txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.AZTEC);
+                    generateCode(BarcodeFormat.AZTEC,true);
                     break;
                 case "RSS_14":
-                    txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.RSS_14);
-                    break;
+                case "UPC_EAN_EXTENSION":
                 case "MAXICODE":
-                    txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.MAXICODE);
-                    break;
                 case "RSS_EXPANDED":
                     txtCodeType.setText("Code: "+codeData.getCodeType());
-                    generateCode(BarcodeFormat.RSS_EXPANDED);
+                    txtNotSupport.setVisibility(View.VISIBLE);
                     break;
             }
         }catch (WriterException e) {
@@ -256,9 +242,13 @@ public class DetailCodeActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void generateCode(BarcodeFormat type) throws WriterException {
-
-        BitMatrix bitMatrix = multiFormatWriter.encode(codeData.getData(), type, 400, 400);
+    private void generateCode(BarcodeFormat type,boolean is2D) throws WriterException {
+        BitMatrix bitMatrix;
+        if(is2D){
+            bitMatrix = multiFormatWriter.encode(codeData.getData(), type, 600, 600);
+        }else {
+            bitMatrix = multiFormatWriter.encode(codeData.getData(), type, 600, 200);
+        }
         BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
         Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
         Log.e("123123", "generateCode: "+bitmap );
@@ -360,6 +350,7 @@ public class DetailCodeActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        txtNotSupport = findViewById(R.id.txtNotSupport);
         imgBack = findViewById(R.id.imgBack);
         imgLike = findViewById(R.id.imgLike);
         imgLove = findViewById(R.id.imgLove);

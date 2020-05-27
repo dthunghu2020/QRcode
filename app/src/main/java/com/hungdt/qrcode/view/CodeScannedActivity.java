@@ -18,13 +18,11 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.hungdt.qrcode.QRCodeConfigs;
 import com.hungdt.qrcode.R;
 import com.hungdt.qrcode.database.DBHelper;
 import com.hungdt.qrcode.dataset.Constant;
 import com.hungdt.qrcode.utils.Ads;
 import com.hungdt.qrcode.utils.KEY;
-import com.unity3d.ads.UnityAds;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

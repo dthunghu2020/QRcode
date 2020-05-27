@@ -15,7 +15,7 @@ public class MySetting {
 
     public static int getCount(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE);
-        return preferences.getInt(COUNT, 0);
+        return preferences.getInt(COUNT, 1);
     }
 
     public static void setCount(Context context, int count) {

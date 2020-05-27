@@ -170,7 +170,7 @@
                                 android:textColor="@color/black" />
                         </LinearLayout>
 
-                        <LinearLayout
+                        <FrameLayout
                             android:id="@+id/llImageCode"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -184,7 +184,14 @@
                                 android:id="@+id/imgDetailImage"
                                 android:layout_width="@dimen/_120sdp"
                                 android:layout_height="@dimen/_120sdp" />
-                        </LinearLayout>
+                            <TextView
+                                android:id="@+id/txtNotSupport"
+                                android:background="@drawable/shape_conner_gray"
+                                android:gravity="center"
+                                android:text="Image\nNot support"
+                                android:layout_width="@dimen/_120sdp"
+                                android:layout_height="@dimen/_120sdp"/>
+                        </FrameLayout>
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

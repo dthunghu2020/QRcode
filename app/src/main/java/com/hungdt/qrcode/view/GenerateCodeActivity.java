@@ -71,7 +71,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Objects;
-import java.util.Random;
 import java.util.regex.Pattern;
 
 public class GenerateCodeActivity extends AppCompatActivity implements BillingProcessor.IBillingHandler {
@@ -82,6 +81,7 @@ public class GenerateCodeActivity extends AppCompatActivity implements BillingPr
     private EditText edtTextGenerateCode;
     private LinearLayout llGenerateCode, llSaveCodeGenerate, llShareCodeGenerate;
     private ImageView imgBack, imgCodeGenerate;
+    private TextView txtText;
 
     private MultiFormatWriter multiFormatWriter;
     private BarcodeFormat barcodeFormat;
@@ -117,15 +117,11 @@ public class GenerateCodeActivity extends AppCompatActivity implements BillingPr
         names.add("EAN_8");
         names.add("UPC_A");
         names.add("UPC_E");
-        names.add("UPC_EAN_EXTENSION");
         names.add("ITF");
         names.add("PDF_417");
         names.add("CODABAR");
         names.add("DATA_MATRIX");
         names.add("AZTEC");
-        names.add("RSS_14");
-        names.add("MAXICODE");
-        names.add("RSS_EXPANDED");
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, names);
         spinnerCodeType.setAdapter(arrayAdapter);
@@ -136,54 +132,55 @@ public class GenerateCodeActivity extends AppCompatActivity implements BillingPr
                 switch (position) {
                     case 0:
                         barcodeFormat = BarcodeFormat.QR_CODE;
+                        txtText.setText("Enter Phone number, Website, Email, ... \nto generate code");
                         break;
                     case 1:
                         barcodeFormat = BarcodeFormat.CODE_128;
+                        txtText.setText("Enter Phone number, Website, Email, ... \n(Max 80 characters)");
                         break;
                     case 2:
                         barcodeFormat = BarcodeFormat.CODE_93;
+                        txtText.setText("Enter Phone number, Website, Email, ... \n(Maximum 80 characters)");
                         break;
                     case 3:
                         barcodeFormat = BarcodeFormat.CODE_39;
+                        txtText.setText("Enter Phone number, Website, Email, ... \n(Maximum 80 characters)");
                         break;
                     case 4:
                         barcodeFormat = BarcodeFormat.EAN_13;
+                        txtText.setText("Support only number! 12 characters\n(+1 character depends on the previous 12 characters!)");
                         break;
                     case 5:
                         barcodeFormat = BarcodeFormat.EAN_8;
+                        txtText.setText("Support only number! 7 characters\n(+1 character depends on the previous 7 characters!)");
                         break;
                     case 6:
                         barcodeFormat = BarcodeFormat.UPC_A;
+                        txtText.setText("Support only number! 11 characters\n(+1 character depends on the previous 11 characters!)");
                         break;
                     case 7:
                         barcodeFormat = BarcodeFormat.UPC_E;
+                        txtText.setText("Support only number! 7 characters\n(+1 character depends on the previous 7 characters!)");
                         break;
                     case 8:
-                        barcodeFormat = BarcodeFormat.UPC_EAN_EXTENSION;
+                        barcodeFormat = BarcodeFormat.ITF;
+                        txtText.setText("Support only even number!\n(Maximum 80 characters)");
                         break;
                     case 9:
-                        barcodeFormat = BarcodeFormat.ITF;
+                        barcodeFormat = BarcodeFormat.PDF_417;
+                        txtText.setText("Enter your data to generate code\n(Not support some language!)");
                         break;
                     case 10:
-                        barcodeFormat = BarcodeFormat.PDF_417;
+                        barcodeFormat = BarcodeFormat.CODABAR;
+                        txtText.setText("Support only number! (Obsolete)");
                         break;
                     case 11:
-                        barcodeFormat = BarcodeFormat.CODABAR;
+                        barcodeFormat = BarcodeFormat.DATA_MATRIX;
+                        txtText.setText("Enter Phone number, Website, Email, ...\n(Not support some language!)");
                         break;
                     case 12:
-                        barcodeFormat = BarcodeFormat.DATA_MATRIX;
-                        break;
-                    case 13:
                         barcodeFormat = BarcodeFormat.AZTEC;
-                        break;
-                    case 14:
-                        barcodeFormat = BarcodeFormat.RSS_14;
-                        break;
-                    case 15:
-                        barcodeFormat = BarcodeFormat.MAXICODE;
-                        break;
-                    case 16:
-                        barcodeFormat = BarcodeFormat.RSS_EXPANDED;
+                        txtText.setText("Enter Phone number, Website, Email, ... \nto generate code!");
                         break;
                 }
             }
@@ -203,60 +200,55 @@ public class GenerateCodeActivity extends AppCompatActivity implements BillingPr
                 try {
                     switch (barcodeFormat) {
                         case QR_CODE:
-                            generateCode(BarcodeFormat.QR_CODE);
+                            generateCode(BarcodeFormat.QR_CODE,true);
                             break;
                         case CODE_128:
-                            generateCode(BarcodeFormat.CODE_128);
+                            generateCode(BarcodeFormat.CODE_128,false);
                             break;
                         case CODE_93:
-                            generateCode(BarcodeFormat.CODE_93);
+                            generateCode(BarcodeFormat.CODE_93,false);
                             break;
                         case CODE_39:
-                            generateCode(BarcodeFormat.CODE_39);
+                            generateCode(BarcodeFormat.CODE_39,false);
                             break;
                         case EAN_13:
-                            generateCode(BarcodeFormat.EAN_13);
+                            generateCode(BarcodeFormat.EAN_13,false);
                             break;
                         case EAN_8:
-                            generateCode(BarcodeFormat.EAN_8);
+                            generateCode(BarcodeFormat.EAN_8,false);
                             break;
                         case UPC_A:
-                            generateCode(BarcodeFormat.UPC_A);
+                            generateCode(BarcodeFormat.UPC_A,false);
                             break;
                         case UPC_E:
-                            generateCode(BarcodeFormat.UPC_E);
-                            break;
-                        case UPC_EAN_EXTENSION:
-                            generateCode(BarcodeFormat.UPC_EAN_EXTENSION);
+                            generateCode(BarcodeFormat.UPC_E,false);
                             break;
                         case ITF:
-                            generateCode(BarcodeFormat.ITF);
+                            generateCode(BarcodeFormat.ITF,false);
                             break;
                         case PDF_417:
-                            generateCode(BarcodeFormat.PDF_417);
+                            generateCode(BarcodeFormat.PDF_417,false);
                             break;
                         case CODABAR:
-                            generateCode(BarcodeFormat.CODABAR);
+                            generateCode(BarcodeFormat.CODABAR,false);
                             break;
                         case DATA_MATRIX:
-                            generateCode(BarcodeFormat.DATA_MATRIX);
+                            generateCode(BarcodeFormat.DATA_MATRIX,true);
                             break;
                         case AZTEC:
-                            generateCode(BarcodeFormat.AZTEC);
-                            break;
-                        case RSS_14:
-                            generateCode(BarcodeFormat.RSS_14);
-                            break;
-                        case MAXICODE:
-                            generateCode(BarcodeFormat.MAXICODE);
-                            break;
-                        case RSS_EXPANDED:
-                            generateCode(BarcodeFormat.RSS_EXPANDED);
+                            generateCode(BarcodeFormat.AZTEC,true);
                             break;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                llGenerateCode.setEnabled(false);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        llGenerateCode.setEnabled(true);
+                    }
+                },500);
             }
         });
 
@@ -334,10 +326,10 @@ public class GenerateCodeActivity extends AppCompatActivity implements BillingPr
         View view = inflater.inflate(R.layout.video_ads_dialog, null);
 
         Button btnActiveVip = view.findViewById(R.id.btnActiveVip);
-        Button btnWhatVideo = view.findViewById(R.id.btnWhatVideo);
+        Button btnWatchVideo = view.findViewById(R.id.btnWatchVideo);
         ImageView imgX = view.findViewById(R.id.imgX);
 
-        btnWhatVideo.setOnClickListener(new View.OnClickListener() {
+        btnWatchVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (morePlaceDialog != null) morePlaceDialog.dismiss();
@@ -589,13 +581,18 @@ public class GenerateCodeActivity extends AppCompatActivity implements BillingPr
         llSaveCodeGenerate = findViewById(R.id.llSaveCodeGenerate);
         llShareCodeGenerate = findViewById(R.id.llShareCodeGenerate);
         imgBack = findViewById(R.id.imgBack);
+        txtText = findViewById(R.id.txtText);
     }
 
-    private void generateCode(BarcodeFormat type) throws WriterException {
-        invisibleView();
+    private void generateCode(BarcodeFormat type,boolean is2D) throws WriterException {
         dataSave = edtTextGenerateCode.getText().toString();
         checkTypeText();
-        BitMatrix bitMatrix = multiFormatWriter.encode(dataSave, type, 400, 400);
+        BitMatrix bitMatrix;
+        if(is2D){
+            bitMatrix = multiFormatWriter.encode(dataSave, type, 600, 600);
+        }else {
+            bitMatrix = multiFormatWriter.encode(dataSave, type, 600, 200);
+        }
         BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
         Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
         Log.e("123123", "generateCode: " + bitmap);
@@ -603,6 +600,10 @@ public class GenerateCodeActivity extends AppCompatActivity implements BillingPr
             visibleView();
             codeGenerated = true;
             imgCodeGenerate.setImageBitmap(bitmap);
+            Toast.makeText(this, "Generate Success!!!", Toast.LENGTH_SHORT).show();
+        }else {
+            invisibleView();
+            Toast.makeText(this, "Your content is not support for this type code!!!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -688,7 +689,11 @@ public class GenerateCodeActivity extends AppCompatActivity implements BillingPr
     @Override
     public void onBackPressed() {
         if (codeGenerated && !codeSaved) {
-            openExitGenerateDialog();
+            if(MySetting.getCount(this)==MySetting.getMaxLength(this)){
+                onBackPressed();
+            }else {
+                openExitGenerateDialog();
+            }
         } else {
             super.onBackPressed();
             sendResult();

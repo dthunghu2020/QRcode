@@ -14,12 +14,10 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -272,7 +270,13 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
                         openGenerateCodeActivity();
                     }
                 }
-
+                llGenerateCode.setEnabled(false);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        llGenerateCode.setEnabled(true);
+                    }
+                },1250);
             }
         });
         llSaved.setOnClickListener(new View.OnClickListener() {
@@ -310,6 +314,13 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                imgRemoveAds.setEnabled(false);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        imgRemoveAds.setEnabled(true);
+                    }
+                },1250);
             }
         });
 
@@ -319,6 +330,13 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
             public void onClick(View v) {
                 isDailyReward = true;
                 openVideoAdsDialog();
+                imgGift.setEnabled(false);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        imgGift.setEnabled(true);
+                    }
+                },1250);
             }
         });
 
@@ -365,16 +383,26 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
         @SuppressLint("InflateParams") final View view = inflater.inflate(R.layout.video_ads_dialog, null);
 
         TextView txtTitle = view.findViewById(R.id.txtTitle);
+        TextView txtBody = view.findViewById(R.id.txtBody);
         Button btnActiveVip = view.findViewById(R.id.btnActiveVip);
-        Button btnWhatVideo = view.findViewById(R.id.btnWhatVideo);
-        ImageView imgX = view.findViewById(R.id.imgX);
+        Button btnWatchVideo = view.findViewById(R.id.btnWatchVideo);
+        final ImageView imgX = view.findViewById(R.id.imgX);
         LinearLayout llVIP = view.findViewById(R.id.llVIP);
         if (isDailyReward) {
+            btnWatchVideo.setText("Great");
+            txtBody.setText("2 Free code generation times is waiting for you.\nWatch Ads to get it now!!! ");
             txtTitle.setText("Daily Reward!");
             llVIP.setVisibility(View.GONE);
+            imgX.setVisibility(View.GONE);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    imgX.setVisibility(View.VISIBLE);
+                }
+            },3000);
         }
 
-        btnWhatVideo.setOnClickListener(new View.OnClickListener() {
+        btnWatchVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (morePlaceDialog != null) morePlaceDialog.dismiss();
@@ -484,8 +512,7 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
 
             try {
                 progressDialog = new ProgressDialog(this);
-                //todo ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                progressDialog.setIcon(R.drawable.ic_code);
+                progressDialog.setIcon(R.drawable.app_icon);
                 progressDialog.setMessage("Please wait, the Ad is loaded...");
                 progressDialog.setCancelable(false);
                 progressDialog.show();
@@ -811,7 +838,7 @@ public class MainActivity extends AppCompatActivity implements BillingProcessor.
                 dialog.dismiss();
             }
         });
-
+        Objects.requireNonNull(morePlaceDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.show();
     }
 

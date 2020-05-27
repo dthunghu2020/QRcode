@@ -28,8 +28,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:maskColor="#77000000"
-            app:zxing_framing_rect_height="@dimen/_220sdp"
-            app:zxing_framing_rect_width="@dimen/_220sdp"
+            app:zxing_framing_rect_height="@dimen/_210sdp"
+            app:zxing_framing_rect_width="@dimen/_210sdp"
             app:zxing_possible_result_points="@color/red"
             app:zxing_result_view="@color/colorPrimaryDark"
             app:zxing_viewfinder_laser="#123123"
@@ -191,13 +191,14 @@
                         android:src="@drawable/ic_generate" />
                     <ImageView
                         android:id="@+id/imgGiftGenerate"
-                        android:src="@drawable/ic_gift"
-                        android:layout_marginTop="@dimen/_5sdp"
-                        android:layout_marginEnd="@dimen/_5sdp"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        android:layout_width="@dimen/_15sdp"
-                        android:layout_height="@dimen/_15sdp"/>
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_width="@dimen/_50sdp"
+                        android:layout_height="@dimen/_50sdp"
+                        android:padding="@dimen/_10sdp"
+                        android:src="@drawable/ic_gen_gift" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -318,6 +319,14 @@
             android:inputType="textCapWords|text"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent" />
+        <ImageView
+            android:src="@drawable/ic_scan_frame"
+            android:layout_width="@dimen/_214sdp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_height="@dimen/_214sdp"/>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

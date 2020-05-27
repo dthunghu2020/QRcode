@@ -56,7 +56,7 @@
                 android:id="@+id/btnVip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_10sdp"
                 android:background="@drawable/shape_bg_button_blue"
                 android:paddingStart="@dimen/_45sdp"
                 android:paddingEnd="@dimen/_45sdp"
@@ -75,13 +75,15 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_2sdp"
-                android:padding="@dimen/_6sdp">
+                android:layout_marginTop="@dimen/_10sdp"
+                android:paddingStart="@dimen/_6sdp"
+                android:paddingEnd="@dimen/_6sdp">
 
                 <ImageView
+                    android:layout_marginTop="@dimen/_5sdp"
                     android:id="@+id/imgVip3"
-                    android:layout_width="@dimen/_40sdp"
-                    android:layout_height="@dimen/_40sdp"
+                    android:layout_width="@dimen/_36sdp"
+                    android:layout_height="@dimen/_36sdp"
                     android:layout_marginStart="@dimen/_25sdp"
                     android:layout_marginEnd="@dimen/_20sdp"
                     android:src="@drawable/img_vip3"
@@ -90,13 +92,14 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:layout_marginTop="@dimen/_2sdp"
                     android:id="@+id/txtTitleVip3"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/_20sdp"
                     android:text="Remove Ads"
                     android:textColor="@color/black"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/imgVip3"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -119,8 +122,8 @@
 
                 <ImageView
                     android:id="@+id/imgVip1"
-                    android:layout_width="@dimen/_40sdp"
-                    android:layout_height="@dimen/_40sdp"
+                    android:layout_width="@dimen/_36sdp"
+                    android:layout_height="@dimen/_36sdp"
                     android:layout_marginStart="@dimen/_25sdp"
                     android:layout_marginEnd="@dimen/_20sdp"
                     android:src="@drawable/img_vip1"
@@ -135,7 +138,7 @@
                     android:layout_marginStart="@dimen/_20sdp"
                     android:text="Generate Unlimited Codes"
                     android:textColor="@color/black"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/imgVip1"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -160,8 +163,8 @@
 
                 <ImageView
                     android:id="@+id/imgVip2"
-                    android:layout_width="@dimen/_40sdp"
-                    android:layout_height="@dimen/_40sdp"
+                    android:layout_width="@dimen/_36sdp"
+                    android:layout_height="@dimen/_36sdp"
                     android:layout_marginStart="@dimen/_25sdp"
                     android:layout_marginEnd="@dimen/_20sdp"
                     android:src="@drawable/img_vip2"
@@ -176,7 +179,7 @@
                     android:layout_marginStart="@dimen/_20sdp"
                     android:text="Get All Features Once And Forever"
                     android:textColor="@color/black"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/imgVip2"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -200,8 +203,8 @@
 
                 <ImageView
                     android:id="@+id/imgVip4"
-                    android:layout_width="@dimen/_40sdp"
-                    android:layout_height="@dimen/_40sdp"
+                    android:layout_width="@dimen/_36sdp"
+                    android:layout_height="@dimen/_36sdp"
                     android:layout_marginStart="@dimen/_25sdp"
                     android:layout_marginEnd="@dimen/_20sdp"
                     android:src="@drawable/ic_code"
@@ -216,7 +219,7 @@
                     android:layout_marginStart="@dimen/_20sdp"
                     android:text=" And More Upcoming Features"
                     android:textColor="@color/black"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/imgVip4"
                     app:layout_constraintTop_toTopOf="parent" />

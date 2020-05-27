@@ -62,7 +62,7 @@
 
             <Button
                 android:id="@+id/btnActiveVip"
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/_80sdp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/_5sdp"
                 android:background="@drawable/shape_bg_btn_green"
@@ -88,19 +88,20 @@
                 android:src="@drawable/ic_video" />
 
             <TextView
+                android:id="@+id/txtBody"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/_50sdp"
                 android:gravity="center"
-                android:text="Watch a video to get 2 more code generation times!"
+                android:text="Watch ads to get free 2 times generate"
                 android:textColor="@color/black" />
 
             <Button
-                android:id="@+id/btnWhatVideo"
-                android:layout_width="wrap_content"
+                android:id="@+id/btnWatchVideo"
+                android:layout_width="@dimen/_80sdp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/_5sdp"
                 android:background="@drawable/shape_bg_button_blue"
-                android:text="What video"
+                android:text="Watch"
                 android:textAllCaps="false"
                 android:textColor="@color/white" />
         </LinearLayout>

@@ -20,5 +20,5 @@
         android:title="Feedback to Developer" />
     <item
         android:id="@+id/nav_more_app"
-        android:title="More App" />
+        android:title="More Apps" />
 </menu>

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray">
+    android:background="@color/light_gray">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
@@ -40,12 +40,13 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="?attr/actionBarSize"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/llBanner">
+        app:layout_constraintBottom_toTopOf="@+id/llBanner"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <androidx.cardview.widget.CardView
                 android:id="@+id/cvTitle"
                 android:layout_width="match_parent"
@@ -56,9 +57,9 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:padding="@dimen/_2sdp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/_2sdp">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -86,8 +87,8 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Protect your content"
                             android:layout_marginTop="@dimen/_5sdp"
+                            android:text="Protect your content"
                             app:layout_constraintStart_toStartOf="@+id/txtTitleToolBar"
                             app:layout_constraintTop_toBottomOf="@+id/txtTitleToolBar" />
                     </LinearLayout>
@@ -97,12 +98,13 @@
                         android:layout_width="@dimen/_86sdp"
                         android:layout_height="@dimen/_86sdp"
                         android:layout_marginEnd="@dimen/_20sdp"
-                        app:layout_constraintBottom_toBottomOf="parent"
                         android:src="@drawable/img_vip"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
+
             <LinearLayout
                 android:id="@+id/lnNative"
                 android:layout_width="match_parent"
@@ -110,11 +112,11 @@
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginTop="@dimen/_8sdp"
                 android:layout_marginEnd="@dimen/_8sdp"
-                app:layout_constraintTop_toBottomOf="@+id/cvTitle"
-                android:orientation="vertical">
-            </LinearLayout>
+                android:orientation="vertical"
+                app:layout_constraintTop_toBottomOf="@+id/cvTitle"></LinearLayout>
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/cvData"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_8sdp"
@@ -128,28 +130,27 @@
                     android:layout_height="wrap_content"
                     android:padding="@dimen/_8sdp">
 
-                    <TextView
-                        android:id="@+id/txtText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="Enter Phone number, Website, Email, ... to generate code"
-                        app:layout_constraintTop_toTopOf="parent" />
-
                     <LinearLayout
                         android:id="@+id/llSpinner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/_10sdp"
                         android:background="@drawable/shape_conner_gray"
-                        app:layout_constraintTop_toBottomOf="@+id/txtText">
-
+                        app:layout_constraintTop_toTopOf="parent">
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spinnerCodeType"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:minHeight="@dimen/_30sdp" />
                     </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/txtText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:layout_marginTop="@dimen/_6sdp"
+                        android:text="Enter Phone number, Website, Email, ... to generate code"
+                        app:layout_constraintTop_toBottomOf="@+id/llSpinner" />
 
                     <EditText
                         android:id="@+id/edtTextGenerateCode"
@@ -168,7 +169,7 @@
                         android:paddingBottom="@dimen/_5sdp"
                         android:textColor="#000000"
                         android:textSize="16sp"
-                        app:layout_constraintTop_toBottomOf="@+id/llSpinner" />
+                        app:layout_constraintTop_toBottomOf="@+id/txtText" />
 
 
                     <LinearLayout
@@ -260,8 +261,14 @@
                     </LinearLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_5sdp"
+                app:layout_constraintTop_toBottomOf="@+id/cvData" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+
     <LinearLayout
         android:id="@+id/llBanner"
         android:layout_width="match_parent"
